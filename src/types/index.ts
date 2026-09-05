@@ -163,7 +163,7 @@ export interface Booking {
   bookingNumber: string;
   officialLabRefNumber?: string;
   createdAt: string;
-  status: 'REQUEST_RECEIVED' | 'REGISTERED_WITH_LAB' | 'PHLEBOTOMIST_ASSIGNED' | 'SAMPLE_COLLECTED' | 'REPORT_GENERATED';
+  status: 'PENDING_TEAM_BOOKING' | 'BOOKED_BY_TEAM' | 'PHLEBOTOMIST_ASSIGNED' | 'SAMPLE_COLLECTED' | 'REPORT_GENERATED';
   bookingType: 'HOME_COLLECTION' | 'LAB_VISIT';
   selectedLabName: string;
   selectedLabBrandId?: string;
@@ -195,7 +195,8 @@ export interface Booking {
   totalAmount: number;
   paymentMode: 'PAY_DIRECTLY_TO_LAB' | 'CASH_ON_COLLECTION' | 'DIRECT_UPI_TO_PHLEBOTOMIST';
   paymentStatus: 'PAY_ON_COLLECTION_TO_LAB' | 'PAID_TO_LAB' | 'PENDING';
-  teamAssignedAgent?: string;
+  bookedByOperatorName?: string;
+  bookedAtTimestamp?: string;
   teamNotes?: string;
   phlebotomist?: {
     name: string;

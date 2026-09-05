@@ -58,7 +58,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
       if (b.id === bookingId) {
         return {
           ...b,
-          status: 'REGISTERED_WITH_LAB' as const,
+          status: 'BOOKED_BY_TEAM' as const,
           officialLabRefNumber: generatedToken,
           teamNotes: `Registered in ${b.selectedLabName} LIMS on ${new Date().toLocaleTimeString()} by Operations Team.`,
           phlebotomist: {
@@ -243,7 +243,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
             <div className="space-y-3 max-h-[600px] overflow-y-auto">
               {filteredBookings.map((b) => {
                 const isSelected = selectedBooking?.id === b.id;
-                const isNew = b.status === 'REQUEST_RECEIVED';
+                const isNew = b.status === 'PENDING_TEAM_BOOKING';
 
                 return (
                   <div
@@ -263,17 +263,17 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                       </span>
                       <span
                         className={`text-[10px] font-extrabold px-2.5 py-0.5 rounded-full ${
-                          b.status === 'REQUEST_RECEIVED'
+                          b.status === 'PENDING_TEAM_BOOKING'
                             ? 'bg-amber-100 text-amber-900 border border-amber-200 animate-pulse'
-                            : b.status === 'REGISTERED_WITH_LAB'
+                            : b.status === 'BOOKED_BY_TEAM'
                             ? 'bg-sky-100 text-sky-900 border border-sky-200'
                             : b.status === 'SAMPLE_COLLECTED'
                             ? 'bg-emerald-100 text-emerald-900 border border-emerald-200'
                             : 'bg-slate-100 text-slate-700'
                         }`}
                       >
-                        {b.status === 'REQUEST_RECEIVED' && '📥 Action Needed: Register in Lab'}
-                        {b.status === 'REGISTERED_WITH_LAB' && '✓ Registered in Lab LIMS'}
+                        {b.status === 'PENDING_TEAM_BOOKING' && '📥 Action Needed: Register in Lab'}
+                        {b.status === 'BOOKED_BY_TEAM' && '✓ Registered in Lab LIMS'}
                         {b.status === 'SAMPLE_COLLECTED' && '🧪 Sample Collected'}
                         {b.status === 'REPORT_GENERATED' && '📄 Report Released'}
                       </span>
@@ -344,7 +344,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                     </span>
                   </div>
 
-                  {selectedBooking.status === 'REQUEST_RECEIVED' && (
+                  {selectedBooking.status === 'PENDING_TEAM_BOOKING' && (
                     <div className="space-y-3">
                       <p className="text-xs text-slate-600">
                         This patient requested direct test registration. Click below to register the test into <strong>{selectedBooking.selectedLabName}</strong> LIMS and generate the official lab barcode token:
@@ -362,7 +362,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                     </div>
                   )}
 
-                  {selectedBooking.status === 'REGISTERED_WITH_LAB' && (
+                  {selectedBooking.status === 'BOOKED_BY_TEAM' && (
                     <div className="space-y-3">
                       <div className="bg-emerald-50 p-3 rounded-2xl border border-emerald-200 text-xs text-emerald-900 flex items-center justify-between">
                         <div>
