@@ -77,10 +77,10 @@
 ### Installation
 ```bash
 # Clone the repository
-git clone https://github.com/<your-username>/aurahealth-north-india-diagnostics.git
+git clone https://github.com/<your-username>/aurahealth-diagnostics.git
 
 # Navigate to directory
-cd aurahealth-north-india-diagnostics
+cd aurahealth-diagnostics
 
 # Install dependencies
 npm install
@@ -102,7 +102,7 @@ npm run preview
 ## 🛠️ Project Structure
 
 ```
-north-india-diagnostics/
+aurahealth-diagnostics/
 ├── src/
 │   ├── components/
 │   │   ├── AdminDashboard.tsx           # Operations & phlebotomy dispatch
