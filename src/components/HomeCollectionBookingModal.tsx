@@ -10,11 +10,11 @@ import {
   ShieldCheck,
   Building2,
   User,
-  Plus,
-  Trash2,
   Sparkles,
+  Bell,
+  ArrowRight,
 } from 'lucide-react';
-import { CartItem, Booking, Beneficiary, PatientProfile } from '../types';
+import { CartItem, Booking, PatientProfile, TeamNotification } from '../types';
 import { PROMO_COUPONS } from '../data/mockData';
 import confetti from 'canvas-confetti';
 
@@ -25,7 +25,7 @@ interface HomeCollectionBookingModalProps {
   subtotal: number;
   selectedCity: string;
   patientProfile: PatientProfile;
-  onBookingSuccess: (booking: Booking) => void;
+  onBookingSuccess: (booking: Booking, notification: TeamNotification) => void;
 }
 
 export const HomeCollectionBookingModal: React.FC<HomeCollectionBookingModalProps> = ({
@@ -37,19 +37,17 @@ export const HomeCollectionBookingModal: React.FC<HomeCollectionBookingModalProp
   patientProfile,
   onBookingSuccess,
 }) => {
-  const [step, setStep] = useState<number>(1);
   const [slotDate, setSlotDate] = useState<string>(
     new Date(Date.now() + 86400000).toISOString().split('T')[0]
   );
   const [slotTime, setSlotTime] = useState<string>('06:00 AM - 07:00 AM (Early Fasting)');
-  const [paymentMode, setPaymentMode] = useState<'CASH_ON_COLLECTION' | 'ONLINE_UPI_CARD'>('ONLINE_UPI_CARD');
 
-  // Patient Address & Details (Auto-filled from patientProfile)
-  const [name, setName] = useState<string>(patientProfile.fullName);
-  const [phone, setPhone] = useState<string>(patientProfile.phone);
-  const [email, setEmail] = useState<string>(patientProfile.email);
-  const [address, setAddress] = useState<string>(patientProfile.address);
-  const [pincode, setPincode] = useState<string>(patientProfile.pincode);
+  // Patient Address & Details (Auto-filled from patientProfile or editable)
+  const [name, setName] = useState<string>(patientProfile.fullName || '');
+  const [phone, setPhone] = useState<string>(patientProfile.phone || '');
+  const [email, setEmail] = useState<string>(patientProfile.email || '');
+  const [address, setAddress] = useState<string>(patientProfile.address || '');
+  const [pincode, setPincode] = useState<string>(patientProfile.pincode || '');
   const [landmark, setLandmark] = useState<string>('Near Main Road');
 
   // Coupon state
@@ -96,9 +94,9 @@ export const HomeCollectionBookingModal: React.FC<HomeCollectionBookingModalProp
     }
   };
 
-  const handleConfirmOrder = () => {
-    if (!name || !phone || !address || !pincode) {
-      alert('Please fill in complete address and contact details.');
+  const handleConfirmDirectRegistration = () => {
+    if (!name.trim() || !phone.trim() || !address.trim() || !pincode.trim()) {
+      alert('Please fill in your Full Name, Mobile Number, and complete Doorstep Address.');
       return;
     }
 
@@ -107,33 +105,37 @@ export const HomeCollectionBookingModal: React.FC<HomeCollectionBookingModalProp
       setIsSubmitting(false);
       const bookingNumber = `BK-${Math.floor(100000 + Math.random() * 900000)}`;
       const primaryLab = cartItems[0]?.selectedLabOffering?.labName || 'Agilus Diagnostics';
+      const testNames = cartItems.map((ci) => ci.item.name);
 
       const newBooking: Booking = {
         id: `bk-${Date.now()}`,
         bookingNumber,
         createdAt: new Date().toLocaleString(),
-        status: 'PHLEBOTOMIST_ASSIGNED',
+        status: 'REQUEST_RECEIVED', // Sent to our operations team to register with lab
         bookingType: 'HOME_COLLECTION',
         selectedLabName: primaryLab,
+        selectedLabBrandId: cartItems[0]?.selectedLabOffering?.labId || 'lab-agilus',
         patientDetails: {
-          name,
-          phone,
-          email,
-          age: patientProfile.age || 45,
+          name: name.trim(),
+          phone: phone.trim(),
+          email: email.trim(),
+          age: patientProfile.age || 42,
           gender: patientProfile.gender || 'Male',
-          address,
+          address: address.trim(),
           city: selectedCity,
           state: 'Delhi NCR',
-          pincode,
-          landmark,
+          pincode: pincode.trim(),
+          landmark: landmark.trim(),
         },
-        beneficiaries: patientProfile.savedBeneficiaries,
+        beneficiaries: patientProfile.savedBeneficiaries.length > 0 ? patientProfile.savedBeneficiaries : [
+          { id: `ben-self`, name: name.trim(), age: 42, gender: 'Male', relation: 'Self', phoneNumber: phone.trim() }
+        ],
         items: cartItems.map((ci) => ({
           title: ci.item.name,
           type: ci.type,
           price: ci.selectedLabOffering?.discountPrice || ci.item.discountPrice,
-          labName: ci.selectedLabOffering?.labName || 'Certified Lab',
-          forBeneficiaryName: name,
+          labName: ci.selectedLabOffering?.labName || primaryLab,
+          forBeneficiaryName: name.trim(),
         })),
         slotDate,
         slotTime,
@@ -141,23 +143,31 @@ export const HomeCollectionBookingModal: React.FC<HomeCollectionBookingModalProp
         discount,
         collectionFee,
         totalAmount,
-        paymentMode,
-        paymentStatus: paymentMode === 'ONLINE_UPI_CARD' ? 'PAID' : 'PENDING',
-        phlebotomist: {
-          name: 'Vikas Sharma',
-          phone: '+91 98112 88990',
-          badgeNumber: `PHLEB-${primaryLab.substring(0, 3).toUpperCase()}-108`,
-          vaccinationStatus: 'Fully Vaccinated & Verified',
-          liveLocationStatus: 'Assigned for morning collection slot',
-        },
+        paymentMode: 'PAY_DIRECTLY_TO_LAB',
+        paymentStatus: 'PAY_ON_COLLECTION_TO_LAB',
+        teamNotes: 'Direct Test Registration requested. Pending official LIMS lab token assignment by team.',
+      };
+
+      const notification: TeamNotification = {
+        id: `notif-${Date.now()}`,
+        bookingNumber,
+        patientName: name.trim(),
+        patientPhone: phone.trim(),
+        selectedLab: primaryLab,
+        testNames,
+        totalAmount,
+        slotTime: `${slotDate} (${slotTime.split(' ')[0]})`,
+        city: selectedCity,
+        timestamp: 'Just now',
+        isRead: false,
       };
 
       setConfirmedBooking(newBooking);
-      onBookingSuccess(newBooking);
+      onBookingSuccess(newBooking, notification);
       try {
         confetti({ particleCount: 80, spread: 70, origin: { y: 0.6 } });
       } catch (err) {}
-    }, 1200);
+    }, 1000);
   };
 
   return (
@@ -166,11 +176,16 @@ export const HomeCollectionBookingModal: React.FC<HomeCollectionBookingModalProp
         {/* Header */}
         <div className="p-6 border-b border-slate-100 flex items-center justify-between bg-gradient-to-r from-brand-navy to-brand-800 text-white">
           <div>
-            <span className="text-[10px] font-extrabold uppercase tracking-widest text-brand-teal bg-teal-950/70 px-2 py-0.5 rounded border border-teal-800/70">
-              Multi-Lab Doorstep Phlebotomy Checkout
-            </span>
-            <h2 className="text-lg font-black text-white mt-0.5">
-              {confirmedBooking ? 'Booking Confirmed!' : 'Schedule Home Sample Collection'}
+            <div className="flex items-center gap-2">
+              <span className="text-[10px] font-extrabold uppercase tracking-widest text-brand-teal bg-teal-950/70 px-2 py-0.5 rounded border border-teal-800/70">
+                Direct Medical Test Registration
+              </span>
+              <span className="text-[10px] font-bold text-amber-300 bg-amber-950/80 px-2 py-0.5 rounded border border-amber-500/30">
+                ₹0 Advance Fee
+              </span>
+            </div>
+            <h2 className="text-lg font-black text-white mt-1">
+              {confirmedBooking ? 'Test Request Submitted!' : 'Register Tests for Home Collection'}
             </h2>
           </div>
           <button
@@ -184,24 +199,42 @@ export const HomeCollectionBookingModal: React.FC<HomeCollectionBookingModalProp
         {/* Content */}
         <div className="p-6 overflow-y-auto flex-1 space-y-5">
           {confirmedBooking ? (
-            /* Success confirmation */
+            /* Confirmation Screen */
             <div className="text-center py-4 space-y-4">
               <div className="w-16 h-16 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center mx-auto animate-bounce">
                 <CheckCircle2 className="w-10 h-10" />
               </div>
+
               <div>
-                <h3 className="text-xl font-black text-brand-navy">Sample Collection Booked!</h3>
+                <span className="inline-flex items-center gap-1 text-[11px] font-bold text-emerald-800 bg-emerald-50 px-3 py-0.5 rounded-full border border-emerald-200">
+                  <Bell className="w-3.5 h-3.5 text-emerald-600" /> Operations Team Notified for Lab Registration
+                </span>
+                <h3 className="text-xl font-black text-brand-navy mt-1">
+                  Test Request Registered Successfully!
+                </h3>
                 <p className="text-xs text-slate-500 mt-0.5">
-                  Booking Number:{' '}
+                  Request Ref ID:{' '}
                   <span className="font-mono font-bold text-brand-600">
                     {confirmedBooking.bookingNumber}
                   </span>
                 </p>
               </div>
 
+              {/* Direct to Lab Notice */}
+              <div className="bg-amber-50 rounded-2xl p-4 border border-amber-200 text-xs text-left space-y-2">
+                <div className="flex items-center gap-2 text-amber-900 font-bold">
+                  <ShieldCheck className="w-4 h-4 text-amber-600 shrink-0" />
+                  <span>Direct Payment to Laboratory on Sample Collection:</span>
+                </div>
+                <p className="text-[11px] text-amber-800 leading-relaxed">
+                  You do not need to pay anything on this website. Our team is registering your test with <strong>{confirmedBooking.selectedLabName}</strong>. You will pay the amount of <strong className="text-slate-900">₹{confirmedBooking.totalAmount}</strong> directly to the visiting certified phlebotomist via <strong>UPI / GPay / Cash</strong>.
+                </p>
+              </div>
+
+              {/* Summary */}
               <div className="bg-slate-50 rounded-2xl p-4 border border-slate-200 text-xs text-left space-y-2">
                 <div className="flex justify-between">
-                  <span className="text-slate-400">Diagnostic Laboratory:</span>
+                  <span className="text-slate-400">Chosen Lab:</span>
                   <strong className="text-brand-navy">{confirmedBooking.selectedLabName}</strong>
                 </div>
                 <div className="flex justify-between">
@@ -217,10 +250,10 @@ export const HomeCollectionBookingModal: React.FC<HomeCollectionBookingModalProp
                   </strong>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-slate-400">Assigned Phlebotomist:</span>
-                  <strong className="text-emerald-700">
-                    {confirmedBooking.phlebotomist?.name} ({confirmedBooking.phlebotomist?.badgeNumber})
-                  </strong>
+                  <span className="text-slate-400">Doorstep Address:</span>
+                  <span className="text-slate-700 truncate max-w-[260px]">
+                    {confirmedBooking.patientDetails.address}, {confirmedBooking.patientDetails.pincode}
+                  </span>
                 </div>
               </div>
 
@@ -228,16 +261,31 @@ export const HomeCollectionBookingModal: React.FC<HomeCollectionBookingModalProp
                 onClick={onClose}
                 className="w-full py-3 bg-brand-navy text-white text-xs font-bold rounded-xl hover:bg-brand-darkBlue transition"
               >
-                Close &amp; Track in Operations Console
+                Done
               </button>
             </div>
           ) : (
-            /* Multi-step checkout form */
+            /* Direct Registration Form */
             <div className="space-y-4">
+              {/* Direct payment guarantee banner */}
+              <div className="bg-gradient-to-r from-emerald-50 to-teal-50 border border-emerald-200 p-3.5 rounded-2xl flex items-start gap-3">
+                <div className="w-7 h-7 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center shrink-0 mt-0.5">
+                  <Banknote className="w-4 h-4" />
+                </div>
+                <div>
+                  <h4 className="text-xs font-black text-emerald-950">
+                    Direct Payment to Lab · ₹0 Platform Advance Fee
+                  </h4>
+                  <p className="text-[11px] text-emerald-800 mt-0.5">
+                    Our team registers your test directly with the selected laboratory network. You pay only upon sample collection directly to the certified phlebotomist.
+                  </p>
+                </div>
+              </div>
+
               {/* Selected Tests & Labs Summary */}
               <div className="bg-slate-50 p-3.5 rounded-2xl border border-slate-200 space-y-2">
                 <span className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400 block">
-                  Tests &amp; Selected Labs ({cartItems.length}):
+                  Tests to Register ({cartItems.length}):
                 </span>
                 <div className="space-y-1.5">
                   {cartItems.map((ci) => (
@@ -259,7 +307,7 @@ export const HomeCollectionBookingModal: React.FC<HomeCollectionBookingModalProp
                 </div>
               </div>
 
-              {/* Step 1: Slot Date & Early Morning Fasting Picker */}
+              {/* Slot Date & Early Morning Fasting Picker */}
               <div className="space-y-2">
                 <label className="text-xs font-bold text-slate-700 block">
                   Select Fasting Date &amp; 6:00 AM Slot
@@ -285,7 +333,7 @@ export const HomeCollectionBookingModal: React.FC<HomeCollectionBookingModalProp
                 </div>
               </div>
 
-              {/* Step 2: Patient Details */}
+              {/* Patient Contact & Address Details */}
               <div className="space-y-2">
                 <label className="text-xs font-bold text-slate-700 block">
                   Patient Contact &amp; Doorstep Address
@@ -294,7 +342,7 @@ export const HomeCollectionBookingModal: React.FC<HomeCollectionBookingModalProp
                   <input
                     type="text"
                     required
-                    placeholder="Patient Name"
+                    placeholder="Patient Full Name *"
                     value={name}
                     onChange={(e) => setName(e.target.value)}
                     className="px-3 py-2 text-xs bg-white border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-500"
@@ -302,9 +350,10 @@ export const HomeCollectionBookingModal: React.FC<HomeCollectionBookingModalProp
                   <input
                     type="tel"
                     required
-                    placeholder="Mobile Number"
+                    maxLength={10}
+                    placeholder="Mobile Number *"
                     value={phone}
-                    onChange={(e) => setPhone(e.target.value)}
+                    onChange={(e) => setPhone(e.target.value.replace(/\D/g, ''))}
                     className="px-3 py-2 text-xs bg-white border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-500 font-mono"
                   />
                 </div>
@@ -312,7 +361,7 @@ export const HomeCollectionBookingModal: React.FC<HomeCollectionBookingModalProp
                   <input
                     type="text"
                     required
-                    placeholder="Address / Flat / Landmark"
+                    placeholder="House / Flat No., Landmark *"
                     value={address}
                     onChange={(e) => setAddress(e.target.value)}
                     className="col-span-2 px-3 py-2 text-xs bg-white border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-500"
@@ -320,7 +369,8 @@ export const HomeCollectionBookingModal: React.FC<HomeCollectionBookingModalProp
                   <input
                     type="text"
                     required
-                    placeholder="Pincode"
+                    maxLength={6}
+                    placeholder="Pincode *"
                     value={pincode}
                     onChange={(e) => setPincode(e.target.value)}
                     className="px-3 py-2 text-xs bg-white border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-500 font-mono"
@@ -346,15 +396,15 @@ export const HomeCollectionBookingModal: React.FC<HomeCollectionBookingModalProp
                 </button>
               </div>
 
-              {/* Payment Mode & Price Breakdown */}
+              {/* Direct Lab Billing Summary */}
               <div className="bg-slate-50 p-4 rounded-2xl border border-slate-200 space-y-2 text-xs">
                 <div className="flex justify-between text-slate-500">
-                  <span>Subtotal:</span>
+                  <span>Lab Test Charges:</span>
                   <span>₹{subtotal}</span>
                 </div>
                 {discount > 0 && (
                   <div className="flex justify-between text-emerald-600 font-bold">
-                    <span>Coupon Discount ({appliedCoupon?.code}):</span>
+                    <span>Direct Lab Discount ({appliedCoupon?.code}):</span>
                     <span>-₹{discount}</span>
                   </div>
                 )}
@@ -363,54 +413,24 @@ export const HomeCollectionBookingModal: React.FC<HomeCollectionBookingModalProp
                   <span>{collectionFee === 0 ? 'FREE' : `₹${collectionFee}`}</span>
                 </div>
                 <div className="flex justify-between text-sm font-black text-brand-navy pt-2 border-t border-slate-200">
-                  <span>Total Payable:</span>
+                  <span>Amount to Pay to Lab on Collection:</span>
                   <span>₹{totalAmount}</span>
                 </div>
               </div>
 
-              {/* Payment Selector */}
-              <div className="grid grid-cols-2 gap-2">
-                <button
-                  type="button"
-                  onClick={() => setPaymentMode('ONLINE_UPI_CARD')}
-                  className={`p-3 rounded-2xl border text-left transition flex items-center gap-2 ${
-                    paymentMode === 'ONLINE_UPI_CARD'
-                      ? 'border-brand-500 bg-brand-50 text-brand-navy font-bold ring-1 ring-brand-500'
-                      : 'border-slate-200 hover:bg-slate-50 text-slate-700'
-                  }`}
-                >
-                  <CreditCard className="w-4 h-4 text-brand-teal" />
-                  <div>
-                    <div className="text-xs">Instant Online UPI / Card</div>
-                    <div className="text-[10px] text-slate-400">GPay, PhonePe, Paytm</div>
-                  </div>
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => setPaymentMode('CASH_ON_COLLECTION')}
-                  className={`p-3 rounded-2xl border text-left transition flex items-center gap-2 ${
-                    paymentMode === 'CASH_ON_COLLECTION'
-                      ? 'border-brand-500 bg-brand-50 text-brand-navy font-bold ring-1 ring-brand-500'
-                      : 'border-slate-200 hover:bg-slate-50 text-slate-700'
-                  }`}
-                >
-                  <Banknote className="w-4 h-4 text-brand-coral" />
-                  <div>
-                    <div className="text-xs">Cash on Collection</div>
-                    <div className="text-[10px] text-slate-400">Pay Phlebotomist</div>
-                  </div>
-                </button>
-              </div>
-
-              {/* Submit */}
+              {/* Direct Registration Submit CTA */}
               <button
                 type="button"
                 disabled={isSubmitting}
-                onClick={handleConfirmOrder}
+                onClick={handleConfirmDirectRegistration}
                 className="w-full py-3.5 bg-gradient-to-r from-brand-coral to-amber-500 hover:from-brand-coral hover:to-amber-600 text-white font-black text-xs rounded-2xl shadow-lg transition flex items-center justify-center gap-2 disabled:opacity-50"
               >
-                {isSubmitting ? 'Confirming with Lab Dispatch...' : `Confirm Booking · ₹${totalAmount}`}
+                <Bell className="w-4 h-4" />
+                <span>
+                  {isSubmitting
+                    ? 'Alerting Team & Registering with Lab...'
+                    : `Direct Register Tests · Pay ₹${totalAmount} to Lab on Collection`}
+                </span>
               </button>
             </div>
           )}

@@ -144,11 +144,26 @@ export interface CartItem {
   beneficiaryIds: string[];
 }
 
+export interface TeamNotification {
+  id: string;
+  bookingNumber: string;
+  patientName: string;
+  patientPhone: string;
+  selectedLab: string;
+  testNames: string[];
+  totalAmount: number;
+  slotTime: string;
+  city: string;
+  timestamp: string;
+  isRead: boolean;
+}
+
 export interface Booking {
   id: string;
   bookingNumber: string;
+  officialLabRefNumber?: string;
   createdAt: string;
-  status: 'CONFIRMED' | 'PHLEBOTOMIST_ASSIGNED' | 'SAMPLE_COLLECTED' | 'IN_LAB' | 'REPORT_GENERATED';
+  status: 'REQUEST_RECEIVED' | 'REGISTERED_WITH_LAB' | 'PHLEBOTOMIST_ASSIGNED' | 'SAMPLE_COLLECTED' | 'REPORT_GENERATED';
   bookingType: 'HOME_COLLECTION' | 'LAB_VISIT';
   selectedLabName: string;
   selectedLabBrandId?: string;
@@ -178,8 +193,10 @@ export interface Booking {
   discount: number;
   collectionFee: number;
   totalAmount: number;
-  paymentMode: 'CASH_ON_COLLECTION' | 'ONLINE_UPI_CARD';
-  paymentStatus: 'PAID' | 'PENDING';
+  paymentMode: 'PAY_DIRECTLY_TO_LAB' | 'CASH_ON_COLLECTION' | 'DIRECT_UPI_TO_PHLEBOTOMIST';
+  paymentStatus: 'PAY_ON_COLLECTION_TO_LAB' | 'PAID_TO_LAB' | 'PENDING';
+  teamAssignedAgent?: string;
+  teamNotes?: string;
   phlebotomist?: {
     name: string;
     phone: string;

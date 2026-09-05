@@ -17,6 +17,7 @@ import {
   Building2,
   User,
   UserPlus,
+  Bell,
 } from 'lucide-react';
 import { PatientProfile } from '../types';
 
@@ -27,6 +28,7 @@ interface NavbarProps {
   onOpenCartDrawer: () => void;
   onOpenRegistrationModal: () => void;
   patientProfile: PatientProfile;
+  unreadNotificationsCount: number;
   cartCount: number;
   cartTotal: number;
   activeTab: string;
@@ -41,6 +43,7 @@ export const Navbar: React.FC<NavbarProps> = ({
   onOpenCartDrawer,
   onOpenRegistrationModal,
   patientProfile,
+  unreadNotificationsCount,
   cartCount,
   cartTotal,
   activeTab,
@@ -75,7 +78,7 @@ export const Navbar: React.FC<NavbarProps> = ({
 
             <div className="hidden lg:flex items-center gap-1 text-[11px] text-emerald-400 bg-emerald-950/40 px-2.5 py-0.5 rounded-full border border-emerald-500/20">
               <Clock className="w-3 h-3" />
-              <span>Fasting Home Collection from 6:00 AM across all labs</span>
+              <span>Direct Lab Billing · ₹0 Platform Advance Fee</span>
             </div>
           </div>
 
@@ -111,7 +114,7 @@ export const Navbar: React.FC<NavbarProps> = ({
 
             <button
               onClick={() => setActiveTab('admin')}
-              className={`flex items-center gap-1 px-2.5 py-0.5 rounded transition ${
+              className={`flex items-center gap-1.5 px-2.5 py-0.5 rounded transition relative ${
                 activeTab === 'admin'
                   ? 'bg-brand-coral text-white font-semibold'
                   : 'text-slate-300 hover:text-white hover:bg-slate-800'
@@ -119,6 +122,11 @@ export const Navbar: React.FC<NavbarProps> = ({
             >
               <UserCheck className="w-3 h-3" />
               <span>Operations Portal</span>
+              {unreadNotificationsCount > 0 && (
+                <span className="w-4 h-4 rounded-full bg-amber-400 text-slate-900 text-[9px] font-black flex items-center justify-center animate-bounce">
+                  {unreadNotificationsCount}
+                </span>
+              )}
             </button>
           </div>
         </div>
@@ -142,7 +150,7 @@ export const Navbar: React.FC<NavbarProps> = ({
               </span>
             </div>
             <p className="text-[10px] text-slate-400 font-medium tracking-wide">
-              Compare &amp; Book Across Certified Diagnostic Labs
+              Compare &amp; Direct Register Across Certified Diagnostic Labs
             </p>
           </div>
         </div>
@@ -342,12 +350,12 @@ export const Navbar: React.FC<NavbarProps> = ({
             </button>
             <button
               onClick={() => {
-                setActiveTab('doctors');
+                setActiveTab('admin');
                 setMobileMenuOpen(false);
               }}
-              className="p-3 text-left bg-slate-50 rounded-xl text-xs font-semibold text-slate-800"
+              className="p-3 text-left bg-slate-800 text-white rounded-xl text-xs font-bold"
             >
-              🩺 Doctor Consult
+              ⚙️ Operations Portal ({unreadNotificationsCount} Alerts)
             </button>
           </div>
         </div>

@@ -18,15 +18,16 @@ import { PatientRegistrationModal } from './components/PatientRegistrationModal'
 import { LabComparisonModal } from './components/LabComparisonModal';
 import { CartDrawer } from './components/CartDrawer';
 import { HomeCollectionBookingModal } from './components/HomeCollectionBookingModal';
-import { CartItem, HealthPackage, TestItem, Booking, PatientProfile, LabTestOffering } from './types';
+import { CartItem, HealthPackage, TestItem, Booking, PatientProfile, LabTestOffering, TeamNotification } from './types';
 import { INITIAL_BOOKINGS, HEALTH_PACKAGES, INITIAL_EMPTY_PATIENT_PROFILE, POPULAR_TESTS } from './data/mockData';
-import { Check } from 'lucide-react';
+import { Check, Bell } from 'lucide-react';
 
 export function App() {
   const [selectedCity, setSelectedCity] = useState<string>('Gurugram (Gurgaon)');
   const [activeTab, setActiveTab] = useState<string>('home');
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
   const [bookings, setBookings] = useState<Booking[]>(INITIAL_BOOKINGS);
+  const [notifications, setNotifications] = useState<TeamNotification[]>([]);
   const [patientProfile, setPatientProfile] = useState<PatientProfile>(INITIAL_EMPTY_PATIENT_PROFILE);
 
   // Modals state
@@ -52,7 +53,7 @@ export function App() {
     setToast(message);
     setTimeout(() => {
       setToast(null);
-    }, 3500);
+    }, 4000);
   };
 
   const handleLogout = () => {
@@ -90,7 +91,7 @@ export function App() {
       showToast(`Updated "${item.name}" with ${offering.labName}!`);
     } else {
       setCartItems((prev) => [...prev, newCartItem]);
-      showToast(`Added "${item.name}" (${offering.labShortName}) to cart!`);
+      showToast(`Added "${item.name}" (${offering.labShortName}) to direct test queue!`);
     }
 
     setIsCartDrawerOpen(true);
@@ -100,9 +101,11 @@ export function App() {
     setCartItems((prev) => prev.filter((ci) => ci.id !== id));
   };
 
-  const handleBookingSuccess = (newBooking: Booking) => {
+  const handleBookingSuccess = (newBooking: Booking, newNotification: TeamNotification) => {
     setBookings((prev) => [newBooking, ...prev]);
+    setNotifications((prev) => [newNotification, ...prev]);
     setCartItems([]);
+    showToast(`🔔 Direct test registration sent to operations team for ${newBooking.selectedLabName}!`);
   };
 
   const handleSearchFocus = () => {
@@ -118,6 +121,8 @@ export function App() {
     0
   );
 
+  const unreadNotificationsCount = notifications.filter((n) => !n.isRead).length;
+
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }, [activeTab]);
@@ -126,8 +131,8 @@ export function App() {
     <div className="min-h-screen flex flex-col bg-slate-50 font-sans">
       {/* Toast Notification */}
       {toast && (
-        <div className="fixed bottom-6 right-6 z-50 bg-slate-900 text-white text-xs font-bold px-4 py-3 rounded-2xl shadow-2xl flex items-center gap-2 border border-slate-700 animate-bounce">
-          <Check className="w-4 h-4 text-emerald-400" />
+        <div className="fixed bottom-6 right-6 z-50 bg-slate-900 text-white text-xs font-bold px-4 py-3 rounded-2xl shadow-2xl flex items-center gap-2.5 border border-slate-700 animate-bounce">
+          <Check className="w-4 h-4 text-emerald-400 shrink-0" />
           <span>{toast}</span>
         </div>
       )}
@@ -140,6 +145,7 @@ export function App() {
         onOpenCartDrawer={() => setIsCartDrawerOpen(true)}
         onOpenRegistrationModal={() => setIsRegistrationModalOpen(true)}
         patientProfile={patientProfile}
+        unreadNotificationsCount={unreadNotificationsCount}
         cartCount={cartItems.length}
         cartTotal={cartTotal}
         activeTab={activeTab}
@@ -237,7 +243,13 @@ export function App() {
         )}
 
         {activeTab === 'admin' && (
-          <AdminDashboard bookings={bookings} setBookings={setBookings} />
+          <AdminDashboard
+            bookings={bookings}
+            setBookings={setBookings}
+            notifications={notifications}
+            setNotifications={setNotifications}
+            onNotify={showToast}
+          />
         )}
       </main>
 
