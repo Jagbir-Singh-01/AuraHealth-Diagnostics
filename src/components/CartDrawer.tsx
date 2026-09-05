@@ -2,12 +2,12 @@ import React from 'react';
 import {
   X,
   Trash2,
-  ShoppingCart,
   ArrowRight,
   ShieldCheck,
-  Truck,
+  ShoppingBag,
   Sparkles,
-  FlaskConical,
+  Building2,
+  Clock,
 } from 'lucide-react';
 import { CartItem } from '../types';
 
@@ -28,149 +28,172 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
 }) => {
   if (!isOpen) return null;
 
-  const subtotal = cartItems.reduce((acc, curr) => acc + curr.item.discountPrice, 0);
-  const freeThreshold = 800;
-  const progressPercent = Math.min(100, (subtotal / freeThreshold) * 100);
-  const diffForFree = Math.max(0, freeThreshold - subtotal);
+  const subtotal = cartItems.reduce(
+    (sum, ci) => sum + (ci.selectedLabOffering?.discountPrice || ci.item.discountPrice),
+    0
+  );
+  const totalOriginal = cartItems.reduce(
+    (sum, ci) => sum + (ci.selectedLabOffering?.originalPrice || ci.item.originalPrice),
+    0
+  );
+  const totalSavings = totalOriginal - subtotal;
+  const freeCollectionThreshold = 800;
+  const isFreeCollection = subtotal >= freeCollectionThreshold;
 
   return (
-    <div className="fixed inset-0 z-50 overflow-hidden bg-slate-900/60 backdrop-blur-xs animate-fade-in flex justify-end">
-      <div className="w-full max-w-md bg-white shadow-2xl h-full flex flex-col justify-between border-l border-slate-200">
-        {/* Drawer Header */}
-        <div className="p-5 border-b border-slate-100 flex items-center justify-between bg-gradient-to-r from-brand-50 to-white">
-          <div className="flex items-center gap-2.5">
-            <div className="w-9 h-9 rounded-xl bg-brand-500 text-white flex items-center justify-center shadow-sm">
-              <ShoppingCart className="w-4 h-4" />
-            </div>
-            <div>
-              <h2 className="text-base font-bold text-brand-navy">Your Test Cart</h2>
-              <p className="text-xs text-slate-500">{cartItems.length} items added</p>
-            </div>
-          </div>
+    <div className="fixed inset-0 z-50 overflow-hidden animate-fade-in">
+      {/* Backdrop */}
+      <div
+        onClick={onClose}
+        className="absolute inset-0 bg-slate-900/50 backdrop-blur-xs transition-opacity"
+      />
 
-          <button
-            onClick={onClose}
-            className="w-8 h-8 rounded-lg hover:bg-slate-100 text-slate-400 hover:text-slate-600 flex items-center justify-center transition"
-          >
-            <X className="w-5 h-5" />
-          </button>
-        </div>
-
-        {/* Drawer Content */}
-        <div className="p-5 overflow-y-auto flex-1 space-y-4">
-          {/* Free Collection Meter */}
-          <div className="bg-slate-50 p-4 rounded-2xl border border-slate-200/80 space-y-2">
-            <div className="flex items-center justify-between text-xs">
-              <span className="font-bold text-slate-700 flex items-center gap-1.5">
-                <Truck className="w-3.5 h-3.5 text-brand-teal" /> Free Home Sample Collection
-              </span>
-              <span className="font-bold text-brand-navy">
-                {diffForFree === 0 ? 'Unlocked 🎉' : `₹${subtotal} / ₹${freeThreshold}`}
+      <div className="fixed inset-y-0 right-0 max-w-full flex pl-10">
+        <div className="w-screen max-w-md bg-white shadow-2xl flex flex-col justify-between">
+          {/* Header */}
+          <div className="p-5 border-b border-slate-100 flex items-center justify-between bg-slate-50">
+            <div className="flex items-center gap-2">
+              <ShoppingBag className="w-5 h-5 text-brand-navy" />
+              <h2 className="text-base font-bold text-brand-navy">Your Diagnostic Cart</h2>
+              <span className="text-xs bg-brand-100 text-brand-700 font-bold px-2 py-0.5 rounded-full">
+                {cartItems.length}
               </span>
             </div>
-
-            <div className="w-full bg-slate-200 rounded-full h-2 overflow-hidden">
-              <div
-                style={{ width: `${progressPercent}%` }}
-                className="bg-brand-500 h-full rounded-full transition-all duration-300"
-              />
-            </div>
-
-            {diffForFree > 0 ? (
-              <p className="text-[11px] text-slate-500">
-                Add tests worth <strong className="text-brand-navy">₹{diffForFree}</strong> more to get free doorstep sample collection!
-              </p>
-            ) : (
-              <p className="text-[11px] text-emerald-600 font-semibold">
-                You've unlocked 100% Free Doorstep Collection across North India!
-              </p>
-            )}
+            <button
+              onClick={onClose}
+              className="w-8 h-8 rounded-full hover:bg-slate-200 text-slate-400 hover:text-slate-600 flex items-center justify-center transition"
+            >
+              <X className="w-5 h-5" />
+            </button>
           </div>
 
           {/* Cart Items List */}
-          {cartItems.length === 0 ? (
-            <div className="text-center py-12 space-y-3">
-              <FlaskConical className="w-12 h-12 text-slate-300 mx-auto" />
-              <div className="text-sm font-bold text-slate-700">Your Cart is Empty</div>
-              <p className="text-xs text-slate-400 max-w-xs mx-auto">
-                Explore our popular health checkup packages or individual blood tests to book home sample collection.
-              </p>
-            </div>
-          ) : (
-            <div className="space-y-3">
-              {cartItems.map((ci) => (
+          <div className="p-5 overflow-y-auto flex-1 space-y-4">
+            {/* Free Home Collection Progress Meter */}
+            <div className="bg-brand-50/70 p-3.5 rounded-2xl border border-brand-100 space-y-2 text-xs">
+              <div className="flex items-center justify-between">
+                <span className="font-bold text-brand-900 flex items-center gap-1.5">
+                  <Sparkles className="w-3.5 h-3.5 text-brand-teal" />
+                  {isFreeCollection
+                    ? '🎉 Free Home Sample Collection Unlocked!'
+                    : `Add ₹${freeCollectionThreshold - subtotal} more for FREE Home Collection`}
+                </span>
+              </div>
+              <div className="w-full h-1.5 bg-slate-200 rounded-full overflow-hidden">
                 <div
-                  key={ci.id}
-                  className="bg-white p-4 rounded-2xl border border-slate-200 shadow-xs flex items-start justify-between gap-3 group"
+                  className="h-full bg-gradient-to-r from-brand-teal to-emerald-500 transition-all duration-500"
+                  style={{
+                    width: `${Math.min(100, (subtotal / freeCollectionThreshold) * 100)}%`,
+                  }}
+                />
+              </div>
+            </div>
+
+            {cartItems.map((cartItem) => {
+              const lab = cartItem.selectedLabOffering;
+              const price = lab ? lab.discountPrice : cartItem.item.discountPrice;
+              const original = lab ? lab.originalPrice : cartItem.item.originalPrice;
+
+              return (
+                <div
+                  key={cartItem.id}
+                  className="p-4 bg-white rounded-2xl border border-slate-200 shadow-2xs space-y-2 relative"
                 >
-                  <div className="flex-1 min-w-0">
-                    <span className="text-[10px] font-bold text-brand-600 bg-brand-50 px-1.5 py-0.5 rounded">
-                      {ci.type === 'PACKAGE' ? 'Health Package' : 'Blood Test'}
-                    </span>
-                    <h4 className="text-xs font-bold text-brand-navy mt-1 truncate">
-                      {ci.item.name}
-                    </h4>
-                    <div className="text-[10px] text-slate-400 mt-0.5">
-                      ⏳ {ci.item.tatHours}h Report • 🍽️ {ci.item.fastingRequired}
-                    </div>
-                    <div className="flex items-baseline gap-2 mt-2">
-                      <span className="text-sm font-black text-brand-navy">
-                        ₹{ci.item.discountPrice}
+                  <div className="flex items-start justify-between gap-2">
+                    <div>
+                      <span className="text-[10px] font-bold text-brand-600 bg-brand-50 px-2 py-0.5 rounded">
+                        {cartItem.type === 'PACKAGE' ? 'Health Package' : 'Pathology Test'}
                       </span>
-                      <span className="text-[11px] text-slate-400 line-through">
-                        ₹{ci.item.originalPrice}
-                      </span>
+                      <h3 className="text-sm font-bold text-slate-800 mt-1 leading-snug">
+                        {cartItem.item.name}
+                      </h3>
                     </div>
+
+                    <button
+                      onClick={() => onRemoveItem(cartItem.id)}
+                      className="text-slate-400 hover:text-red-500 p-1 transition"
+                      aria-label="Remove item"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
                   </div>
 
-                  <button
-                    onClick={() => onRemoveItem(ci.id)}
-                    className="text-slate-300 hover:text-red-500 p-1 rounded-lg transition"
-                    title="Remove item"
-                  >
-                    <Trash2 className="w-4 h-4" />
-                  </button>
+                  {/* Selected Lab Details */}
+                  {lab && (
+                    <div className="bg-slate-50 p-2.5 rounded-xl border border-slate-100 flex items-center justify-between text-[11px]">
+                      <div className="flex items-center gap-1.5">
+                        <Building2 className="w-3.5 h-3.5 text-brand-teal" />
+                        <span className="font-bold text-slate-800">{lab.labName}</span>
+                      </div>
+                      <span className="text-slate-500 flex items-center gap-1">
+                        <Clock className="w-3 h-3" /> {lab.tatText}
+                      </span>
+                    </div>
+                  )}
+
+                  <div className="flex items-center justify-between pt-1 text-xs">
+                    <span className="text-slate-400 text-[11px]">
+                      {cartItem.item.parametersCount} Parameters
+                    </span>
+                    <div className="flex items-baseline gap-1.5">
+                      <span className="text-sm font-black text-brand-navy">₹{price}</span>
+                      <span className="text-xs text-slate-400 line-through">₹{original}</span>
+                    </div>
+                  </div>
                 </div>
-              ))}
+              );
+            })}
+
+            {cartItems.length === 0 && (
+              <div className="text-center py-12 space-y-3">
+                <div className="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mx-auto text-slate-300">
+                  <ShoppingBag className="w-8 h-8" />
+                </div>
+                <h3 className="text-sm font-bold text-slate-700">Your Cart is Empty</h3>
+                <p className="text-xs text-slate-400 max-w-xs mx-auto">
+                  Type any test name or browse health checkup packages to compare labs and add to cart.
+                </p>
+              </div>
+            )}
+          </div>
+
+          {/* Footer with Checkout CTA */}
+          {cartItems.length > 0 && (
+            <div className="p-5 border-t border-slate-100 bg-slate-50 space-y-3">
+              <div className="space-y-1.5 text-xs">
+                <div className="flex justify-between text-slate-500">
+                  <span>Item Subtotal:</span>
+                  <span>₹{subtotal}</span>
+                </div>
+                <div className="flex justify-between text-emerald-600 font-bold">
+                  <span>Total Discount Savings:</span>
+                  <span>-₹{totalSavings}</span>
+                </div>
+                <div className="flex justify-between text-slate-500">
+                  <span>Home Sample Collection:</span>
+                  <span className={isFreeCollection ? 'text-emerald-600 font-bold' : ''}>
+                    {isFreeCollection ? 'FREE' : '₹150'}
+                  </span>
+                </div>
+                <div className="flex justify-between text-base font-black text-brand-navy pt-2 border-t border-slate-200">
+                  <span>To Pay:</span>
+                  <span>₹{isFreeCollection ? subtotal : subtotal + 150}</span>
+                </div>
+              </div>
+
+              <button
+                onClick={() => {
+                  onClose();
+                  onProceedToCheckout();
+                }}
+                className="w-full py-3 bg-gradient-to-r from-brand-coral to-amber-500 hover:from-brand-coral hover:to-amber-600 text-white font-black text-xs rounded-2xl shadow-md transition flex items-center justify-center gap-2"
+              >
+                <span>Select Date &amp; Fasting Slot</span>
+                <ArrowRight className="w-4 h-4" />
+              </button>
             </div>
           )}
         </div>
-
-        {/* Drawer Footer */}
-        {cartItems.length > 0 && (
-          <div className="p-5 bg-slate-50 border-t border-slate-100 space-y-4">
-            <div className="space-y-1.5 text-xs">
-              <div className="flex justify-between text-slate-600">
-                <span>Subtotal</span>
-                <span>₹{subtotal}</span>
-              </div>
-              <div className="flex justify-between text-slate-600">
-                <span>Home Collection</span>
-                <span>{diffForFree === 0 ? 'FREE' : '₹150'}</span>
-              </div>
-              <div className="pt-2 border-t border-slate-200 flex justify-between text-base font-black text-brand-navy">
-                <span>Estimated Total</span>
-                <span>₹{subtotal + (diffForFree === 0 ? 0 : 150)}</span>
-              </div>
-            </div>
-
-            <button
-              onClick={() => {
-                onClose();
-                onProceedToCheckout();
-              }}
-              className="w-full py-3.5 bg-gradient-to-r from-brand-coral to-amber-500 hover:from-brand-coral hover:to-amber-600 text-white text-xs font-bold rounded-xl shadow-lg transition flex items-center justify-center gap-2"
-            >
-              <span>Schedule Home Collection</span>
-              <ArrowRight className="w-4 h-4" />
-            </button>
-
-            <div className="flex items-center justify-center gap-2 text-[10px] text-slate-400">
-              <ShieldCheck className="w-3.5 h-3.5 text-emerald-500" />
-              <span>NABL Certified • 100% Barcoded Safety</span>
-            </div>
-          </div>
-        )}
       </div>
     </div>
   );

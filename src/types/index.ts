@@ -5,6 +5,45 @@ export interface TestParameter {
   description?: string;
 }
 
+export interface LabBrand {
+  id: string;
+  name: string;
+  shortName: string;
+  logo: string;
+  tagline: string;
+  rating: number;
+  reviewCount: number;
+  isNablAccredited: boolean;
+  isCapAccredited: boolean;
+  isIsoCertified: boolean;
+  totalCentersNorthIndia: number;
+  homeCollectionSpeed: string;
+  description: string;
+  badge?: string;
+  primaryColor: string;
+}
+
+export interface LabTestOffering {
+  labId: string;
+  labName: string;
+  labShortName: string;
+  labLogo: string;
+  labBadge?: string;
+  originalPrice: number;
+  discountPrice: number;
+  tatHours: number;
+  tatText: string;
+  rating: number;
+  reviewCount: number;
+  isNablAccredited: boolean;
+  isCapAccredited: boolean;
+  earliestSlot: string;
+  sampleType: string;
+  fastingRequired: string;
+  homeCollectionAvailable: boolean;
+  centerVisitAvailable: boolean;
+}
+
 export interface TestItem {
   id: string;
   name: string;
@@ -23,6 +62,7 @@ export interface TestItem {
   isPopular?: boolean;
   isWinterSeasonal?: boolean;
   genderRestriction?: 'ALL' | 'MALE_ONLY' | 'FEMALE_ONLY';
+  labOfferings: LabTestOffering[];
 }
 
 export interface HealthPackage {
@@ -46,11 +86,14 @@ export interface HealthPackage {
   }[];
   highlights: string[];
   description: string;
+  labOfferings: LabTestOffering[];
 }
 
 export interface LabCenter {
   id: string;
   name: string;
+  labBrandId: string;
+  labBrandName: string;
   state: 'Delhi NCR' | 'Punjab' | 'Haryana' | 'Uttar Pradesh' | 'Rajasthan' | 'Himachal Pradesh' | 'Uttarakhand' | 'Jammu & Kashmir' | 'Chandigarh';
   city: string;
   area: string;
@@ -74,11 +117,30 @@ export interface Beneficiary {
   phoneNumber?: string;
 }
 
+export interface PatientProfile {
+  id: string;
+  fullName: string;
+  phone: string;
+  email: string;
+  age: number;
+  gender: 'Male' | 'Female' | 'Other';
+  bloodGroup?: string;
+  address: string;
+  city: string;
+  state: string;
+  pincode: string;
+  preExistingConditions: string[];
+  savedBeneficiaries: Beneficiary[];
+  registeredAt: string;
+  isLoggedIn: boolean;
+}
+
 export interface CartItem {
   id: string;
   itemId: string;
   type: 'TEST' | 'PACKAGE';
   item: TestItem | HealthPackage;
+  selectedLabOffering: LabTestOffering;
   beneficiaryIds: string[];
 }
 
@@ -88,7 +150,8 @@ export interface Booking {
   createdAt: string;
   status: 'CONFIRMED' | 'PHLEBOTOMIST_ASSIGNED' | 'SAMPLE_COLLECTED' | 'IN_LAB' | 'REPORT_GENERATED';
   bookingType: 'HOME_COLLECTION' | 'LAB_VISIT';
-  selectedLabId?: string;
+  selectedLabName: string;
+  selectedLabBrandId?: string;
   patientDetails: {
     name: string;
     phone: string;
@@ -106,6 +169,7 @@ export interface Booking {
     title: string;
     type: 'TEST' | 'PACKAGE';
     price: number;
+    labName: string;
     forBeneficiaryName: string;
   }[];
   slotDate: string;
@@ -192,7 +256,7 @@ export interface Doctor {
   title: string;
   specialty: 'General Physician' | 'Pulmonologist (Chest & Smog)' | 'Diabetologist & Endocrinologist' | 'Cardiologist' | 'Gynecologist' | 'Pathologist & Lab Report Consultant';
   degrees: string;
-  institution: string; // e.g. AIIMS New Delhi, PGI Chandigarh, KGMU Lucknow
+  institution: string;
   experienceYears: number;
   languages: string[];
   rating: number;

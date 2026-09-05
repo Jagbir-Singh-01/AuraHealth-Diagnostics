@@ -14,13 +14,18 @@ import {
   UserCheck,
   Sparkles,
   Stethoscope,
+  Building2,
+  User,
 } from 'lucide-react';
+import { PatientProfile } from '../types';
 
 interface NavbarProps {
   selectedCity: string;
   onOpenCityModal: () => void;
   onOpenPrescriptionModal: () => void;
   onOpenCartDrawer: () => void;
+  onOpenRegistrationModal: () => void;
+  patientProfile: PatientProfile;
   cartCount: number;
   cartTotal: number;
   activeTab: string;
@@ -33,6 +38,8 @@ export const Navbar: React.FC<NavbarProps> = ({
   onOpenCityModal,
   onOpenPrescriptionModal,
   onOpenCartDrawer,
+  onOpenRegistrationModal,
+  patientProfile,
   cartCount,
   cartTotal,
   activeTab,
@@ -43,7 +50,7 @@ export const Navbar: React.FC<NavbarProps> = ({
 
   return (
     <header className="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-slate-200/80 shadow-nav">
-      {/* Top Utility Bar (Agilus Signature Strip) */}
+      {/* Top Utility Bar */}
       <div className="bg-brand-navy text-white text-xs py-2 px-4 sm:px-8 border-b border-slate-800">
         <div className="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-3">
           {/* Left: Location & Toll-Free */}
@@ -67,16 +74,29 @@ export const Navbar: React.FC<NavbarProps> = ({
 
             <div className="hidden lg:flex items-center gap-1 text-[11px] text-emerald-400 bg-emerald-950/40 px-2.5 py-0.5 rounded-full border border-emerald-500/20">
               <Clock className="w-3 h-3" />
-              <span>Fasting Home Collection from 6:00 AM</span>
+              <span>Fasting Home Collection from 6:00 AM across all labs</span>
             </div>
           </div>
 
-          {/* Right: Accreditations & Operations Switcher */}
+          {/* Right: Accreditations, Patient Login & Operations */}
           <div className="flex items-center gap-3 text-[11px] text-slate-300 ml-auto">
+            {/* Patient Registration / Profile Trigger */}
+            <button
+              onClick={onOpenRegistrationModal}
+              className="flex items-center gap-1.5 bg-brand-500/20 hover:bg-brand-500/30 text-white px-3 py-0.5 rounded-full border border-brand-500/40 text-[11px] font-bold transition"
+            >
+              <User className="w-3 h-3 text-brand-teal" />
+              <span>
+                {patientProfile.isLoggedIn ? `Hello, ${patientProfile.fullName.split(' ')[0]}` : 'Patient Register / Login'}
+              </span>
+            </button>
+
             <span className="hidden sm:flex items-center gap-1 text-slate-300">
-              <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" /> NABL & CAP Accredited
+              <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" /> NABL &amp; CAP Labs
             </span>
+
             <div className="h-3 w-px bg-slate-700 hidden sm:block" />
+
             <button
               onClick={() => setActiveTab('admin')}
               className={`flex items-center gap-1 px-2.5 py-0.5 rounded transition ${
@@ -86,7 +106,7 @@ export const Navbar: React.FC<NavbarProps> = ({
               }`}
             >
               <UserCheck className="w-3 h-3" />
-              <span>Lab Operations Portal</span>
+              <span>Operations Portal</span>
             </button>
           </div>
         </div>
@@ -106,11 +126,11 @@ export const Navbar: React.FC<NavbarProps> = ({
             <div className="flex items-center gap-1.5">
               <span className="text-xl font-black tracking-tight text-brand-navy">AuraHealth</span>
               <span className="text-xs font-bold uppercase tracking-wider text-brand-teal bg-teal-50 px-1.5 py-0.5 rounded border border-teal-200">
-                Diagnostics
+                Multi-Lab
               </span>
             </div>
             <p className="text-[10px] text-slate-400 font-medium tracking-wide">
-              North India's Trusted Lab Network
+              Compare &amp; Book Across Certified Diagnostic Labs
             </p>
           </div>
         </div>
@@ -122,7 +142,7 @@ export const Navbar: React.FC<NavbarProps> = ({
             className="w-full relative flex items-center bg-slate-50 hover:bg-slate-100/80 border border-slate-200 rounded-full px-4 py-2 text-xs text-slate-400 cursor-text transition group shadow-inner"
           >
             <Search className="w-4 h-4 text-slate-400 group-hover:text-brand-500 transition mr-2.5" />
-            <span className="truncate">Search tests (CBC, HbA1c, Vitamin D)...</span>
+            <span className="truncate">Type test name (CBC, HbA1c, Vitamin D)...</span>
             <kbd className="ml-auto text-[10px] font-mono bg-white border border-slate-200 px-1.5 py-0.5 rounded text-slate-400 shadow-2xs">
               ⌘K
             </kbd>
@@ -131,6 +151,32 @@ export const Navbar: React.FC<NavbarProps> = ({
 
         {/* Navigation Links */}
         <nav className="hidden md:flex items-center gap-1 text-xs font-semibold text-slate-700">
+          <button
+            onClick={() => setActiveTab('compare-labs')}
+            className={`px-3 py-2 rounded-lg transition flex items-center gap-1.5 ${
+              activeTab === 'compare-labs'
+                ? 'text-brand-navy bg-brand-50 font-bold ring-1 ring-brand-500/20'
+                : 'hover:text-brand-navy hover:bg-slate-50'
+            }`}
+          >
+            <Building2 className="w-3.5 h-3.5 text-brand-teal" />
+            <span>Compare Labs</span>
+            <span className="text-[9px] bg-amber-100 text-amber-900 font-extrabold px-1.5 py-0.2 rounded-full">
+              7 Chains
+            </span>
+          </button>
+
+          <button
+            onClick={() => setActiveTab('tests')}
+            className={`px-3 py-2 rounded-lg transition ${
+              activeTab === 'tests'
+                ? 'text-brand-600 bg-brand-50 font-bold'
+                : 'hover:text-brand-600 hover:bg-slate-50'
+            }`}
+          >
+            All Tests
+          </button>
+
           <button
             onClick={() => setActiveTab('packages')}
             className={`px-3 py-2 rounded-lg transition ${
@@ -143,17 +189,6 @@ export const Navbar: React.FC<NavbarProps> = ({
           </button>
 
           <button
-            onClick={() => setActiveTab('tests')}
-            className={`px-3 py-2 rounded-lg transition ${
-              activeTab === 'tests'
-                ? 'text-brand-600 bg-brand-50 font-bold'
-                : 'hover:text-brand-600 hover:bg-slate-50'
-            }`}
-          >
-            Tests
-          </button>
-
-          <button
             onClick={() => setActiveTab('doctors')}
             className={`px-3 py-2 rounded-lg transition flex items-center gap-1 ${
               activeTab === 'doctors'
@@ -163,9 +198,6 @@ export const Navbar: React.FC<NavbarProps> = ({
           >
             <Stethoscope className="w-3.5 h-3.5 text-brand-teal" />
             <span>Doctor Consult</span>
-            <span className="text-[9px] bg-emerald-100 text-emerald-800 font-extrabold px-1.5 py-0.2 rounded-full">
-              FREE Review
-            </span>
           </button>
 
           <button
@@ -181,17 +213,6 @@ export const Navbar: React.FC<NavbarProps> = ({
           </button>
 
           <button
-            onClick={() => setActiveTab('labs')}
-            className={`px-3 py-2 rounded-lg transition ${
-              activeTab === 'labs'
-                ? 'text-brand-600 bg-brand-50 font-bold'
-                : 'hover:text-brand-600 hover:bg-slate-50'
-            }`}
-          >
-            Find a Lab
-          </button>
-
-          <button
             onClick={() => setActiveTab('reports')}
             className={`px-3 py-2 rounded-lg transition flex items-center gap-1.5 ${
               activeTab === 'reports'
@@ -200,13 +221,13 @@ export const Navbar: React.FC<NavbarProps> = ({
             }`}
           >
             <FileText className="w-3.5 h-3.5 text-brand-teal" />
-            <span>Download Report</span>
+            <span>Reports</span>
           </button>
         </nav>
 
         {/* Right CTA Actions */}
         <div className="flex items-center gap-2 sm:gap-3">
-          {/* Upload Prescription Button */}
+          {/* Upload Prescription */}
           <button
             onClick={onOpenPrescriptionModal}
             className="hidden sm:flex items-center gap-1.5 px-3 py-2 text-xs font-semibold text-brand-navy bg-slate-100 hover:bg-slate-200 rounded-xl transition border border-slate-200"
@@ -244,9 +265,20 @@ export const Navbar: React.FC<NavbarProps> = ({
         </div>
       </div>
 
-      {/* Mobile Drawer Menu */}
+      {/* Mobile Drawer */}
       {mobileMenuOpen && (
         <div className="md:hidden border-t border-slate-200 bg-white p-4 space-y-3 animate-fade-in shadow-lg">
+          <button
+            onClick={() => {
+              setMobileMenuOpen(false);
+              onOpenRegistrationModal();
+            }}
+            className="w-full p-3 text-left bg-brand-50 rounded-xl text-xs font-bold text-brand-navy border border-brand-200 flex items-center justify-between"
+          >
+            <span>👤 {patientProfile.isLoggedIn ? patientProfile.fullName : 'Register / Sign In'}</span>
+            <span className="text-[10px] text-brand-teal">Edit Profile →</span>
+          </button>
+
           <div
             onClick={() => {
               setMobileMenuOpen(false);
@@ -255,79 +287,46 @@ export const Navbar: React.FC<NavbarProps> = ({
             className="w-full flex items-center bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs text-slate-400"
           >
             <Search className="w-4 h-4 text-slate-400 mr-2" />
-            <span>Search tests and health packages...</span>
+            <span>Type test name (CBC, HbA1c, Vitamin D)...</span>
           </div>
 
           <div className="grid grid-cols-2 gap-2 pt-2">
             <button
               onClick={() => {
-                setActiveTab('doctors');
+                setActiveTab('compare-labs');
                 setMobileMenuOpen(false);
               }}
               className="p-3 text-left bg-teal-50 rounded-xl text-xs font-bold text-teal-900 border border-teal-200"
             >
-              🩺 Doctor Consultation
-            </button>
-            <button
-              onClick={() => {
-                setActiveTab('packages');
-                setMobileMenuOpen(false);
-              }}
-              className="p-3 text-left bg-slate-50 rounded-xl text-xs font-semibold text-slate-800 hover:bg-brand-50"
-            >
-              📦 Health Packages
+              🏢 Compare Labs
             </button>
             <button
               onClick={() => {
                 setActiveTab('tests');
                 setMobileMenuOpen(false);
               }}
-              className="p-3 text-left bg-slate-50 rounded-xl text-xs font-semibold text-slate-800 hover:bg-brand-50"
+              className="p-3 text-left bg-slate-50 rounded-xl text-xs font-semibold text-slate-800"
             >
-              🩸 All Blood Tests
+              🩸 Blood Tests
             </button>
             <button
               onClick={() => {
-                setActiveTab('smog');
+                setActiveTab('packages');
                 setMobileMenuOpen(false);
               }}
-              className="p-3 text-left bg-amber-50 rounded-xl text-xs font-semibold text-amber-900 border border-amber-200"
+              className="p-3 text-left bg-slate-50 rounded-xl text-xs font-semibold text-slate-800"
             >
-              🌫️ Winter Smog Care
+              📦 Packages
             </button>
             <button
               onClick={() => {
-                setActiveTab('labs');
+                setActiveTab('doctors');
                 setMobileMenuOpen(false);
               }}
-              className="p-3 text-left bg-slate-50 rounded-xl text-xs font-semibold text-slate-800 hover:bg-brand-50"
+              className="p-3 text-left bg-slate-50 rounded-xl text-xs font-semibold text-slate-800"
             >
-              🏥 Find a Lab Near You
+              🩺 Doctor Consult
             </button>
-            <button
-              onClick={() => {
-                setActiveTab('reports');
-                setMobileMenuOpen(false);
-              }}
-              className="p-3 text-left bg-slate-50 rounded-xl text-xs font-semibold text-slate-800 hover:bg-brand-50"
-            >
-              📄 Download Report
-            </button>
-          </div>
-
-          <div className="pt-2 border-t border-slate-100 flex items-center justify-between text-xs">
-            <button
-              onClick={() => {
-                onOpenCityModal();
-                setMobileMenuOpen(false);
-              }}
-              className="flex items-center gap-1.5 text-brand-600 font-semibold"
-            >
-              <MapPin className="w-3.5 h-3.5" /> {selectedCity} (Change)
-            </button>
-            <a href="tel:18001202872" className="text-slate-600 font-medium">
-              📞 1800-120-AURA
-            </a>
           </div>
         </div>
       )}

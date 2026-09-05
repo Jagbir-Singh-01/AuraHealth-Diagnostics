@@ -4,6 +4,7 @@ import { HeroSection } from './components/HeroSection';
 import { WinterSmogBanner } from './components/WinterSmogBanner';
 import { PackageGrid } from './components/PackageGrid';
 import { TestCatalog } from './components/TestCatalog';
+import { MultiLabExplorer } from './components/MultiLabExplorer';
 import { LabLocator } from './components/LabLocator';
 import { ReportDownloadPortal } from './components/ReportDownloadPortal';
 import { HealthTracker } from './components/HealthTracker';
@@ -13,25 +14,33 @@ import { HealthBlogSection } from './components/HealthBlogSection';
 import { Footer } from './components/Footer';
 import { CitySelectorModal } from './components/CitySelectorModal';
 import { QuickPrescriptionModal } from './components/QuickPrescriptionModal';
+import { PatientRegistrationModal } from './components/PatientRegistrationModal';
+import { LabComparisonModal } from './components/LabComparisonModal';
 import { CartDrawer } from './components/CartDrawer';
 import { HomeCollectionBookingModal } from './components/HomeCollectionBookingModal';
-import { CartItem, HealthPackage, TestItem, Booking } from './types';
-import { INITIAL_BOOKINGS, HEALTH_PACKAGES } from './data/mockData';
-import { Check, Sparkles } from 'lucide-react';
+import { CartItem, HealthPackage, TestItem, Booking, PatientProfile, LabTestOffering } from './types';
+import { INITIAL_BOOKINGS, HEALTH_PACKAGES, MOCK_PATIENT_PROFILE, POPULAR_TESTS } from './data/mockData';
+import { Check } from 'lucide-react';
 
 export function App() {
   const [selectedCity, setSelectedCity] = useState<string>('Gurugram (Gurgaon)');
   const [activeTab, setActiveTab] = useState<string>('home');
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
   const [bookings, setBookings] = useState<Booking[]>(INITIAL_BOOKINGS);
+  const [patientProfile, setPatientProfile] = useState<PatientProfile>(MOCK_PATIENT_PROFILE);
 
   // Modals state
   const [isCityModalOpen, setIsCityModalOpen] = useState(false);
   const [isPrescriptionModalOpen, setIsPrescriptionModalOpen] = useState(false);
+  const [isRegistrationModalOpen, setIsRegistrationModalOpen] = useState(false);
   const [isCartDrawerOpen, setIsCartDrawerOpen] = useState(false);
   const [isBookingModalOpen, setIsBookingModalOpen] = useState(false);
 
-  // Selected for detailed modal
+  // Lab Comparison Modal
+  const [comparisonItem, setComparisonItem] = useState<TestItem | HealthPackage | null>(null);
+  const [isComparisonModalOpen, setIsComparisonModalOpen] = useState(false);
+
+  // Selected package/test for detailed modal
   const [selectedPackage, setSelectedPackage] = useState<HealthPackage | null>(null);
   const [selectedTest, setSelectedTest] = useState<TestItem | null>(null);
 
@@ -43,27 +52,43 @@ export function App() {
     setToast(message);
     setTimeout(() => {
       setToast(null);
-    }, 3000);
+    }, 3500);
   };
 
-  const handleAddToCart = (item: TestItem | HealthPackage, type: 'TEST' | 'PACKAGE') => {
+  const handleOpenTestComparison = (item: TestItem | HealthPackage) => {
+    setComparisonItem(item);
+    setIsComparisonModalOpen(true);
+  };
+
+  const handleSelectLabOffering = (
+    item: TestItem | HealthPackage,
+    offering: LabTestOffering
+  ) => {
     const existingIndex = cartItems.findIndex((ci) => ci.itemId === item.id);
-    if (existingIndex > -1) {
-      showToast(`"${item.name}" is already in your cart.`);
-      setIsCartDrawerOpen(true);
-      return;
-    }
+    const type: 'TEST' | 'PACKAGE' = 'category' in item && item.category.includes('Routine') || 'code' in item ? 'TEST' : 'PACKAGE';
 
     const newCartItem: CartItem = {
       id: `cart-${Date.now()}-${Math.random()}`,
       itemId: item.id,
       type,
       item,
+      selectedLabOffering: offering,
       beneficiaryIds: ['self'],
     };
 
-    setCartItems((prev) => [...prev, newCartItem]);
-    showToast(`Added "${item.name}" to cart!`);
+    if (existingIndex > -1) {
+      // Replace with new chosen lab offering
+      setCartItems((prev) => {
+        const copy = [...prev];
+        copy[existingIndex] = newCartItem;
+        return copy;
+      });
+      showToast(`Updated "${item.name}" with ${offering.labName}!`);
+    } else {
+      setCartItems((prev) => [...prev, newCartItem]);
+      showToast(`Added "${item.name}" (${offering.labShortName}) to cart!`);
+    }
+
     setIsCartDrawerOpen(true);
   };
 
@@ -84,9 +109,11 @@ export function App() {
     }, 100);
   };
 
-  const cartTotal = cartItems.reduce((sum, ci) => sum + ci.item.discountPrice, 0);
+  const cartTotal = cartItems.reduce(
+    (sum, ci) => sum + (ci.selectedLabOffering?.discountPrice || ci.item.discountPrice),
+    0
+  );
 
-  // Scroll to top on tab change
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }, [activeTab]);
@@ -107,6 +134,8 @@ export function App() {
         onOpenCityModal={() => setIsCityModalOpen(true)}
         onOpenPrescriptionModal={() => setIsPrescriptionModalOpen(true)}
         onOpenCartDrawer={() => setIsCartDrawerOpen(true)}
+        onOpenRegistrationModal={() => setIsRegistrationModalOpen(true)}
+        patientProfile={patientProfile}
         cartCount={cartItems.length}
         cartTotal={cartTotal}
         activeTab={activeTab}
@@ -114,7 +143,7 @@ export function App() {
         onSearchFocus={handleSearchFocus}
       />
 
-      {/* Content Router */}
+      {/* Main Content Router */}
       <main className="flex-1">
         {activeTab === 'home' && (
           <>
@@ -122,29 +151,29 @@ export function App() {
               selectedCity={selectedCity}
               onOpenCityModal={() => setIsCityModalOpen(true)}
               onOpenPrescriptionModal={() => setIsPrescriptionModalOpen(true)}
-              onAddToCart={handleAddToCart}
-              onSelectPackage={(pkg) => setSelectedPackage(pkg)}
-              onSelectTest={(test) => setSelectedTest(test)}
+              onOpenRegistrationModal={() => setIsRegistrationModalOpen(true)}
+              patientProfile={patientProfile}
+              onOpenTestComparison={handleOpenTestComparison}
               searchInputRef={searchInputRef}
             />
 
             <div className="max-w-7xl mx-auto px-4 sm:px-8">
               <WinterSmogBanner
-                onSelectPackage={(pkg) => setSelectedPackage(pkg)}
-                onAddToCart={handleAddToCart}
+                onSelectPackage={(pkg) => handleOpenTestComparison(pkg)}
+                onAddToCart={(pkg) => handleOpenTestComparison(pkg)}
               />
             </div>
 
-            <PackageGrid
-              onAddToCart={handleAddToCart}
-              selectedPackage={selectedPackage}
-              setSelectedPackage={setSelectedPackage}
-            />
-
             <TestCatalog
-              onAddToCart={handleAddToCart}
+              onOpenTestComparison={handleOpenTestComparison}
               selectedTest={selectedTest}
               setSelectedTest={setSelectedTest}
+            />
+
+            <PackageGrid
+              onAddToCart={(pkg) => handleOpenTestComparison(pkg)}
+              selectedPackage={selectedPackage}
+              setSelectedPackage={setSelectedPackage}
             />
 
             <HealthTracker />
@@ -153,43 +182,48 @@ export function App() {
           </>
         )}
 
-        {activeTab === 'doctors' && <DoctorConsultation selectedCity={selectedCity} />}
-
-        {activeTab === 'packages' && (
-          <div className="py-6">
-            <PackageGrid
-              onAddToCart={handleAddToCart}
-              selectedPackage={selectedPackage}
-              setSelectedPackage={setSelectedPackage}
-            />
-          </div>
+        {activeTab === 'compare-labs' && (
+          <MultiLabExplorer
+            selectedCity={selectedCity}
+            onOpenTestComparison={handleOpenTestComparison}
+          />
         )}
 
         {activeTab === 'tests' && (
           <div className="py-6">
             <TestCatalog
-              onAddToCart={handleAddToCart}
+              onOpenTestComparison={handleOpenTestComparison}
               selectedTest={selectedTest}
               setSelectedTest={setSelectedTest}
             />
           </div>
         )}
 
-        {activeTab === 'smog' && (
-          <div className="max-w-7xl mx-auto px-4 sm:px-8 py-8 space-y-6">
-            <WinterSmogBanner
-              onSelectPackage={(pkg) => setSelectedPackage(pkg)}
-              onAddToCart={handleAddToCart}
-            />
+        {activeTab === 'packages' && (
+          <div className="py-6">
             <PackageGrid
-              onAddToCart={handleAddToCart}
+              onAddToCart={(pkg) => handleOpenTestComparison(pkg)}
               selectedPackage={selectedPackage}
               setSelectedPackage={setSelectedPackage}
             />
           </div>
         )}
 
-        {activeTab === 'labs' && <LabLocator />}
+        {activeTab === 'doctors' && <DoctorConsultation selectedCity={selectedCity} />}
+
+        {activeTab === 'smog' && (
+          <div className="max-w-7xl mx-auto px-4 sm:px-8 py-8 space-y-6">
+            <WinterSmogBanner
+              onSelectPackage={(pkg) => handleOpenTestComparison(pkg)}
+              onAddToCart={(pkg) => handleOpenTestComparison(pkg)}
+            />
+            <PackageGrid
+              onAddToCart={(pkg) => handleOpenTestComparison(pkg)}
+              selectedPackage={selectedPackage}
+              setSelectedPackage={setSelectedPackage}
+            />
+          </div>
+        )}
 
         {activeTab === 'reports' && (
           <div className="space-y-8">
@@ -204,6 +238,22 @@ export function App() {
       </main>
 
       {/* Global Modals & Drawers */}
+      <PatientRegistrationModal
+        isOpen={isRegistrationModalOpen}
+        onClose={() => setIsRegistrationModalOpen(false)}
+        patientProfile={patientProfile}
+        setPatientProfile={setPatientProfile}
+        onNotify={showToast}
+      />
+
+      <LabComparisonModal
+        isOpen={isComparisonModalOpen}
+        onClose={() => setIsComparisonModalOpen(false)}
+        item={comparisonItem}
+        onSelectLabOffering={handleSelectLabOffering}
+        selectedCity={selectedCity}
+      />
+
       <CitySelectorModal
         isOpen={isCityModalOpen}
         onClose={() => setIsCityModalOpen(false)}
@@ -234,6 +284,7 @@ export function App() {
         cartItems={cartItems}
         subtotal={cartTotal}
         selectedCity={selectedCity}
+        patientProfile={patientProfile}
         onBookingSuccess={handleBookingSuccess}
       />
 
