@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   X,
   User,
@@ -13,7 +13,8 @@ import {
   Plus,
   Trash2,
   ArrowRight,
-  Lock,
+  LogOut,
+  Sparkles,
 } from 'lucide-react';
 import { PatientProfile, Beneficiary } from '../types';
 import { NORTH_INDIA_CITIES } from '../data/mockData';
@@ -24,6 +25,7 @@ interface PatientRegistrationModalProps {
   onClose: () => void;
   patientProfile: PatientProfile;
   setPatientProfile: (profile: PatientProfile) => void;
+  onLogout: () => void;
   onNotify: (msg: string) => void;
 }
 
@@ -32,27 +34,46 @@ export const PatientRegistrationModal: React.FC<PatientRegistrationModalProps> =
   onClose,
   patientProfile,
   setPatientProfile,
+  onLogout,
   onNotify,
 }) => {
-  const [activeStep, setActiveStep] = useState<'LOGIN' | 'PROFILE' | 'BENEFICIARIES'>('PROFILE');
-  const [fullName, setFullName] = useState(patientProfile.fullName);
-  const [phone, setPhone] = useState(patientProfile.phone);
-  const [email, setEmail] = useState(patientProfile.email);
-  const [age, setAge] = useState(patientProfile.age);
-  const [gender, setGender] = useState(patientProfile.gender);
+  const [activeTab, setActiveTab] = useState<'REGISTER' | 'BENEFICIARIES'>('REGISTER');
+
+  // Form states initialized from patientProfile
+  const [fullName, setFullName] = useState(patientProfile.fullName || '');
+  const [phone, setPhone] = useState(patientProfile.phone || '');
+  const [email, setEmail] = useState(patientProfile.email || '');
+  const [age, setAge] = useState<number | string>(patientProfile.age ? patientProfile.age : '');
+  const [gender, setGender] = useState<'Male' | 'Female' | 'Other'>(patientProfile.gender || 'Male');
   const [bloodGroup, setBloodGroup] = useState(patientProfile.bloodGroup || 'B+');
-  const [address, setAddress] = useState(patientProfile.address);
-  const [city, setCity] = useState(patientProfile.city);
-  const [pincode, setPincode] = useState(patientProfile.pincode);
+  const [address, setAddress] = useState(patientProfile.address || '');
+  const [city, setCity] = useState(patientProfile.city || 'Gurugram (Gurgaon)');
+  const [pincode, setPincode] = useState(patientProfile.pincode || '');
   const [selectedConditions, setSelectedConditions] = useState<string[]>(
-    patientProfile.preExistingConditions
+    patientProfile.preExistingConditions || []
   );
 
-  // New beneficiary form
+  // Beneficiary fields
   const [newBenName, setNewBenName] = useState('');
-  const [newBenAge, setNewBenAge] = useState(30);
+  const [newBenAge, setNewBenAge] = useState<number | string>('');
   const [newBenGender, setNewBenGender] = useState<'Male' | 'Female' | 'Other'>('Female');
   const [newBenRelation, setNewBenRelation] = useState<'Spouse' | 'Father' | 'Mother' | 'Son' | 'Daughter' | 'Other'>('Spouse');
+
+  // Sync state when modal opens or profile changes
+  useEffect(() => {
+    if (isOpen) {
+      setFullName(patientProfile.fullName || '');
+      setPhone(patientProfile.phone || '');
+      setEmail(patientProfile.email || '');
+      setAge(patientProfile.age ? patientProfile.age : '');
+      setGender(patientProfile.gender || 'Male');
+      setBloodGroup(patientProfile.bloodGroup || 'B+');
+      setAddress(patientProfile.address || '');
+      setCity(patientProfile.city || 'Gurugram (Gurgaon)');
+      setPincode(patientProfile.pincode || '');
+      setSelectedConditions(patientProfile.preExistingConditions || []);
+    }
+  }, [isOpen, patientProfile]);
 
   if (!isOpen) return null;
 
@@ -74,45 +95,58 @@ export const PatientRegistrationModal: React.FC<PatientRegistrationModalProps> =
     }
   };
 
-  const handleSaveProfile = (e: React.FormEvent) => {
+  const handleRegisterPatient = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!fullName || !phone) {
-      alert('Please fill in your Full Name and Mobile Number.');
+    if (!fullName.trim() || !phone.trim() || !age) {
+      alert('Please enter your Full Name, Mobile Number, and Age.');
       return;
     }
 
-    const updatedProfile: PatientProfile = {
-      ...patientProfile,
-      fullName,
-      phone,
-      email,
-      age,
+    const newProfile: PatientProfile = {
+      id: `pat-${Date.now()}`,
+      fullName: fullName.trim(),
+      phone: phone.trim(),
+      email: email.trim(),
+      age: typeof age === 'string' ? parseInt(age) || 30 : age,
       gender,
       bloodGroup,
-      address,
+      address: address.trim(),
       city,
-      pincode,
+      state: 'Delhi NCR',
+      pincode: pincode.trim(),
       preExistingConditions: selectedConditions,
+      savedBeneficiaries: [
+        {
+          id: `ben-${Date.now()}`,
+          name: fullName.trim(),
+          age: typeof age === 'string' ? parseInt(age) || 30 : age,
+          gender,
+          relation: 'Self',
+          phoneNumber: phone.trim(),
+        },
+        ...patientProfile.savedBeneficiaries.filter((b) => b.relation !== 'Self'),
+      ],
+      registeredAt: new Date().toISOString().split('T')[0],
       isLoggedIn: true,
     };
 
-    setPatientProfile(updatedProfile);
-    onNotify(`Patient profile for "${fullName}" saved successfully!`);
+    setPatientProfile(newProfile);
+    onNotify(`Welcome, ${fullName.trim()}! Patient profile registered successfully.`);
     try {
-      confetti({ particleCount: 50, spread: 60, origin: { y: 0.6 } });
+      confetti({ particleCount: 60, spread: 70, origin: { y: 0.6 } });
     } catch (err) {}
     onClose();
   };
 
   const handleAddBeneficiary = () => {
-    if (!newBenName) {
-      alert('Please enter member name');
+    if (!newBenName.trim() || !newBenAge) {
+      alert('Please enter family member name and age.');
       return;
     }
     const newBen: Beneficiary = {
       id: `ben-${Date.now()}`,
-      name: newBenName,
-      age: newBenAge,
+      name: newBenName.trim(),
+      age: typeof newBenAge === 'string' ? parseInt(newBenAge) || 30 : newBenAge,
       gender: newBenGender,
       relation: newBenRelation,
     };
@@ -122,7 +156,8 @@ export const PatientRegistrationModal: React.FC<PatientRegistrationModalProps> =
     };
     setPatientProfile(updated);
     setNewBenName('');
-    onNotify(`Added ${newBenName} (${newBenRelation}) to family profile.`);
+    setNewBenAge('');
+    onNotify(`Added ${newBen.name} (${newBen.relation}) to family members.`);
   };
 
   const handleRemoveBeneficiary = (id: string) => {
@@ -143,14 +178,15 @@ export const PatientRegistrationModal: React.FC<PatientRegistrationModalProps> =
               <User className="w-6 h-6 text-brand-teal" />
             </div>
             <div>
-              <span className="text-[10px] font-extrabold uppercase tracking-widest text-brand-teal bg-teal-950/60 px-2 py-0.5 rounded border border-teal-800/60">
-                Step 1 of 3: Patient Registration
+              <span className="text-[10px] font-extrabold uppercase tracking-widest text-brand-teal bg-teal-950/70 px-2 py-0.5 rounded border border-teal-800/70">
+                Step 1: Patient Registration
               </span>
               <h2 className="text-lg font-black tracking-tight text-white mt-0.5">
-                {patientProfile.isLoggedIn ? 'Manage Patient Profile' : 'Patient Registration / Sign In'}
+                {patientProfile.isLoggedIn ? 'Patient Profile Details' : 'Register New Patient'}
               </h2>
             </div>
           </div>
+
           <button
             onClick={onClose}
             className="w-8 h-8 rounded-full hover:bg-white/20 text-slate-300 hover:text-white flex items-center justify-center transition"
@@ -160,43 +196,71 @@ export const PatientRegistrationModal: React.FC<PatientRegistrationModalProps> =
         </div>
 
         {/* Tab switcher */}
-        <div className="flex border-b border-slate-100 bg-slate-50 px-6 pt-2">
-          <button
-            onClick={() => setActiveStep('PROFILE')}
-            className={`px-4 py-2.5 text-xs font-bold border-b-2 transition ${
-              activeStep === 'PROFILE'
-                ? 'border-brand-500 text-brand-navy'
-                : 'border-transparent text-slate-500 hover:text-slate-800'
-            }`}
-          >
-            👤 Primary Patient Info
-          </button>
-          <button
-            onClick={() => setActiveStep('BENEFICIARIES')}
-            className={`px-4 py-2.5 text-xs font-bold border-b-2 transition flex items-center gap-1.5 ${
-              activeStep === 'BENEFICIARIES'
-                ? 'border-brand-500 text-brand-navy'
-                : 'border-transparent text-slate-500 hover:text-slate-800'
-            }`}
-          >
-            <Users className="w-3.5 h-3.5 text-brand-teal" />
-            <span>Family Members ({patientProfile.savedBeneficiaries.length})</span>
-          </button>
+        <div className="flex items-center justify-between border-b border-slate-100 bg-slate-50 px-6 pt-2">
+          <div className="flex">
+            <button
+              onClick={() => setActiveTab('REGISTER')}
+              className={`px-4 py-2.5 text-xs font-bold border-b-2 transition ${
+                activeTab === 'REGISTER'
+                  ? 'border-brand-500 text-brand-navy'
+                  : 'border-transparent text-slate-500 hover:text-slate-800'
+              }`}
+            >
+              👤 {patientProfile.isLoggedIn ? 'Edit Patient Info' : 'Patient Registration Form'}
+            </button>
+            {patientProfile.isLoggedIn && (
+              <button
+                onClick={() => setActiveTab('BENEFICIARIES')}
+                className={`px-4 py-2.5 text-xs font-bold border-b-2 transition flex items-center gap-1.5 ${
+                  activeTab === 'BENEFICIARIES'
+                    ? 'border-brand-500 text-brand-navy'
+                    : 'border-transparent text-slate-500 hover:text-slate-800'
+                }`}
+              >
+                <Users className="w-3.5 h-3.5 text-brand-teal" />
+                <span>Family Members ({patientProfile.savedBeneficiaries.length})</span>
+              </button>
+            )}
+          </div>
+
+          {/* Logout button if registered */}
+          {patientProfile.isLoggedIn && (
+            <button
+              onClick={() => {
+                onLogout();
+                onNotify('Logged out of patient account.');
+                onClose();
+              }}
+              className="text-[11px] font-bold text-red-600 hover:text-red-700 hover:bg-red-50 px-2.5 py-1 rounded-lg flex items-center gap-1 transition"
+            >
+              <LogOut className="w-3.5 h-3.5" />
+              <span>Log Out</span>
+            </button>
+          )}
         </div>
 
-        {/* Body */}
+        {/* Form Body */}
         <div className="p-6 overflow-y-auto flex-1 space-y-5">
-          {activeStep === 'PROFILE' && (
-            <form onSubmit={handleSaveProfile} className="space-y-4">
+          {activeTab === 'REGISTER' && (
+            <form onSubmit={handleRegisterPatient} className="space-y-4">
+              {!patientProfile.isLoggedIn && (
+                <div className="bg-emerald-50 border border-emerald-200 p-3 rounded-2xl flex items-center gap-2.5 text-xs text-emerald-900">
+                  <Sparkles className="w-4 h-4 text-emerald-600 shrink-0" />
+                  <span>
+                    Fill in patient details below to register once and compare test prices across all diagnostic labs!
+                  </span>
+                </div>
+              )}
+
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
                   <label className="text-xs font-bold text-slate-700 block mb-1">
-                    Full Name *
+                    Patient Full Name *
                   </label>
                   <input
                     type="text"
                     required
-                    placeholder="e.g. Rajesh Sharma"
+                    placeholder="e.g. Gurpreet Singh / Priya Verma"
                     value={fullName}
                     onChange={(e) => setFullName(e.target.value)}
                     className="w-full px-3.5 py-2 text-xs bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-500"
@@ -205,7 +269,7 @@ export const PatientRegistrationModal: React.FC<PatientRegistrationModalProps> =
 
                 <div>
                   <label className="text-xs font-bold text-slate-700 block mb-1">
-                    Mobile Number (For Reports &amp; OTP) *
+                    Mobile Number (For Reports &amp; Booking) *
                   </label>
                   <div className="relative">
                     <span className="text-xs font-bold text-slate-400 absolute left-3 top-1/2 -translate-y-1/2">
@@ -226,13 +290,15 @@ export const PatientRegistrationModal: React.FC<PatientRegistrationModalProps> =
 
               <div className="grid grid-cols-3 gap-3">
                 <div>
-                  <label className="text-xs font-bold text-slate-700 block mb-1">Age *</label>
+                  <label className="text-xs font-bold text-slate-700 block mb-1">Age (Years) *</label>
                   <input
                     type="number"
                     min={1}
                     max={120}
+                    required
+                    placeholder="e.g. 42"
                     value={age}
-                    onChange={(e) => setAge(parseInt(e.target.value) || 0)}
+                    onChange={(e) => setAge(e.target.value)}
                     className="w-full px-3 py-2 text-xs bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-500"
                   />
                 </div>
@@ -272,11 +338,11 @@ export const PatientRegistrationModal: React.FC<PatientRegistrationModalProps> =
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
                   <label className="text-xs font-bold text-slate-700 block mb-1">
-                    Email Address
+                    Email Address (Optional)
                   </label>
                   <input
                     type="email"
-                    placeholder="patient@example.com"
+                    placeholder="patient@email.com"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     className="w-full px-3.5 py-2 text-xs bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-500"
@@ -285,7 +351,7 @@ export const PatientRegistrationModal: React.FC<PatientRegistrationModalProps> =
 
                 <div>
                   <label className="text-xs font-bold text-slate-700 block mb-1">
-                    City (North India)
+                    City (North India) *
                   </label>
                   <select
                     value={city}
@@ -303,12 +369,12 @@ export const PatientRegistrationModal: React.FC<PatientRegistrationModalProps> =
 
               <div>
                 <label className="text-xs font-bold text-slate-700 block mb-1">
-                  Home Collection Address &amp; Pincode
+                  Home Collection Doorstep Address &amp; Pincode
                 </label>
                 <div className="grid grid-cols-3 gap-2">
                   <input
                     type="text"
-                    placeholder="Flat / House No., Landmark..."
+                    placeholder="House / Flat No., Sector / Area, Landmark..."
                     value={address}
                     onChange={(e) => setAddress(e.target.value)}
                     className="col-span-2 px-3.5 py-2 text-xs bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-500"
@@ -316,7 +382,7 @@ export const PatientRegistrationModal: React.FC<PatientRegistrationModalProps> =
                   <input
                     type="text"
                     maxLength={6}
-                    placeholder="6-digit Pincode"
+                    placeholder="Pincode"
                     value={pincode}
                     onChange={(e) => setPincode(e.target.value)}
                     className="px-3 py-2 text-xs bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-500 font-mono"
@@ -324,10 +390,10 @@ export const PatientRegistrationModal: React.FC<PatientRegistrationModalProps> =
                 </div>
               </div>
 
-              {/* Health Conditions Chips */}
+              {/* Health Conditions */}
               <div>
                 <label className="text-xs font-bold text-slate-700 block mb-1.5">
-                  Pre-existing Health Conditions (Helps lab doctors recommend tests):
+                  Pre-existing Conditions (Optional):
                 </label>
                 <div className="flex flex-wrap gap-1.5">
                   {conditionsList.map((cond) => {
@@ -354,22 +420,23 @@ export const PatientRegistrationModal: React.FC<PatientRegistrationModalProps> =
               <div className="pt-2">
                 <button
                   type="submit"
-                  className="w-full py-3 bg-gradient-to-r from-brand-coral to-amber-500 hover:from-brand-coral hover:to-amber-600 text-white font-black text-xs rounded-xl shadow-md transition flex items-center justify-center gap-2"
+                  className="w-full py-3.5 bg-gradient-to-r from-brand-coral to-amber-500 hover:from-brand-coral hover:to-amber-600 text-white font-black text-xs rounded-xl shadow-md transition flex items-center justify-center gap-2"
                 >
-                  <span>Save &amp; Continue to Search Tests</span>
+                  <span>
+                    {patientProfile.isLoggedIn ? 'Update Patient Profile' : 'Register & Start Booking Tests'}
+                  </span>
                   <ArrowRight className="w-4 h-4" />
                 </button>
               </div>
             </form>
           )}
 
-          {activeStep === 'BENEFICIARIES' && (
+          {activeTab === 'BENEFICIARIES' && (
             <div className="space-y-4">
               <p className="text-xs text-slate-500">
-                Add family members to book tests from different diagnostic labs in a single order:
+                Add your family members to book multi-person test packages in a single appointment:
               </p>
 
-              {/* Existing Beneficiaries List */}
               <div className="space-y-2">
                 {patientProfile.savedBeneficiaries.map((ben) => (
                   <div
@@ -438,7 +505,7 @@ export const PatientRegistrationModal: React.FC<PatientRegistrationModalProps> =
                     min={1}
                     max={120}
                     value={newBenAge}
-                    onChange={(e) => setNewBenAge(parseInt(e.target.value) || 0)}
+                    onChange={(e) => setNewBenAge(e.target.value)}
                     className="px-3 py-1.5 text-xs bg-white border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-500"
                   />
                   <select

@@ -122,26 +122,22 @@ export const LAB_BRANDS: LabBrand[] = [
   }
 ];
 
-export const MOCK_PATIENT_PROFILE: PatientProfile = {
-  id: 'patient-rajesh-01',
-  fullName: 'Rajesh Sharma',
-  phone: '9876543210',
-  email: 'rajesh.sharma@example.com',
-  age: 48,
+export const INITIAL_EMPTY_PATIENT_PROFILE: PatientProfile = {
+  id: '',
+  fullName: '',
+  phone: '',
+  email: '',
+  age: 0,
   gender: 'Male',
   bloodGroup: 'B+',
-  address: 'Flat 602, Tower 4, DLF Phase 5',
+  address: '',
   city: 'Gurugram (Gurgaon)',
   state: 'Delhi NCR',
-  pincode: '122002',
-  preExistingConditions: ['Pre-diabetes (HbA1c 6.8%)', 'Mild Hypertension'],
-  savedBeneficiaries: [
-    { id: 'ben-01', name: 'Rajesh Sharma', age: 48, gender: 'Male', relation: 'Self', phoneNumber: '9876543210' },
-    { id: 'ben-02', name: 'Meenakshi Sharma', age: 44, gender: 'Female', relation: 'Spouse' },
-    { id: 'ben-03', name: 'Ram Prasad Sharma', age: 74, gender: 'Male', relation: 'Father' }
-  ],
-  registeredAt: '2026-08-15',
-  isLoggedIn: true
+  pincode: '',
+  preExistingConditions: [],
+  savedBeneficiaries: [],
+  registeredAt: '',
+  isLoggedIn: false
 };
 
 export const NORTH_INDIA_CITIES: NorthIndiaCity[] = [
@@ -666,324 +662,6 @@ export const POPULAR_TESTS: TestItem[] = [
         centerVisitAvailable: true
       }
     ]
-  },
-  {
-    id: 't-winter-smog-09',
-    name: 'North India Winter Smog & Respiratory Defense Panel',
-    code: 'RES009',
-    category: 'Allergy & Smog',
-    sampleType: 'Blood (Serum + EDTA)',
-    fastingRequired: 'Non-Fasting',
-    tatHours: 12,
-    originalPrice: 2800,
-    discountPrice: 1199,
-    parametersCount: 16,
-    parametersList: ['Total Serum IgE (Allergy Marker)', 'Absolute Eosinophil Count (AEC)', 'High Sensitivity CRP (hs-CRP Inflammatory)', 'Complete Blood Count (CBC)', 'Serum Ferritin', 'Vitamin D 25-OH'],
-    description: 'Specifically engineered for North Indian urban residents exposed to PM2.5/PM10 winter smog, stubble smoke, and cold-weather bronchial reactivity.',
-    whyTakeThisTest: 'Persistent dry cough, wheezing, morning breathlessness, throat irritation, stinging eyes, and seasonal asthma flares during Oct-Feb.',
-    preparationInstructions: ['No fasting required. Inform lab if currently taking oral corticosteroids or antihistamines.'],
-    isPopular: true,
-    isWinterSeasonal: true,
-    labOfferings: [
-      {
-        labId: 'lab-agilus',
-        labName: 'Agilus Diagnostics',
-        labShortName: 'Agilus',
-        labLogo: 'https://images.unsplash.com/photo-1579684385127-1ef15d508118?w=200&auto=format&fit=crop&q=80',
-        labBadge: 'Delhi-NCR Smog Specialty',
-        originalPrice: 2800,
-        discountPrice: 1199,
-        tatHours: 12,
-        tatText: '12 Hours',
-        rating: 4.9,
-        reviewCount: 3100,
-        isNablAccredited: true,
-        isCapAccredited: true,
-        earliestSlot: '06:00 AM Tomorrow',
-        sampleType: 'Blood (Serum + EDTA)',
-        fastingRequired: 'Non-Fasting',
-        homeCollectionAvailable: true,
-        centerVisitAvailable: true
-      },
-      {
-        labId: 'lab-maxlab',
-        labName: 'Max Lab',
-        labShortName: 'Max Lab',
-        labLogo: 'https://images.unsplash.com/photo-1516549655169-df83a0774514?w=200&auto=format&fit=crop&q=80',
-        labBadge: 'Pulmonology Grade',
-        originalPrice: 3200,
-        discountPrice: 1399,
-        tatHours: 8,
-        tatText: '8 Hours',
-        rating: 4.95,
-        reviewCount: 1800,
-        isNablAccredited: true,
-        isCapAccredited: true,
-        earliestSlot: '06:00 AM Tomorrow',
-        sampleType: 'Blood (Serum + EDTA)',
-        fastingRequired: 'Non-Fasting',
-        homeCollectionAvailable: true,
-        centerVisitAvailable: true
-      },
-      {
-        labId: 'lab-drlal',
-        labName: 'Dr. Lal PathLabs',
-        labShortName: 'Dr Lal',
-        labLogo: 'https://images.unsplash.com/photo-1581595220892-b0739db3ba8c?w=200&auto=format&fit=crop&q=80',
-        labBadge: 'NABL Accredited',
-        originalPrice: 2950,
-        discountPrice: 1250,
-        tatHours: 12,
-        tatText: '12 Hours',
-        rating: 4.88,
-        reviewCount: 4200,
-        isNablAccredited: true,
-        isCapAccredited: true,
-        earliestSlot: '06:30 AM Tomorrow',
-        sampleType: 'Blood (Serum + EDTA)',
-        fastingRequired: 'Non-Fasting',
-        homeCollectionAvailable: true,
-        centerVisitAvailable: true
-      }
-    ]
-  },
-  {
-    id: 't-lft-07',
-    name: 'Liver Function Test (LFT) with GGT',
-    code: 'LIV002',
-    category: 'Liver & Kidney',
-    sampleType: 'Blood (Serum)',
-    fastingRequired: '8-10 hrs Fasting',
-    tatHours: 6,
-    originalPrice: 850,
-    discountPrice: 450,
-    parametersCount: 11,
-    parametersList: ['Bilirubin Total', 'Bilirubin Direct', 'Bilirubin Indirect', 'SGOT / AST', 'SGPT / ALT', 'Alkaline Phosphatase (ALP)', 'Gamma GT (GGT)', 'Total Protein', 'Serum Albumin', 'Serum Globulin', 'A/G Ratio'],
-    description: 'Evaluates liver inflammation, bile duct clearance, and protein synthesis capacity; detects fatty liver disease.',
-    whyTakeThisTest: 'Screening for jaundice, alcohol metabolism, medication side-effects, unexplained nausea, or fatty liver on ultrasound.',
-    preparationInstructions: ['8-10 hours fasting. Refrain from alcohol consumption for 48 hours prior to test.'],
-    isPopular: true,
-    labOfferings: [
-      {
-        labId: 'lab-thyrocare',
-        labName: 'Thyrocare Technologies',
-        labShortName: 'Thyrocare',
-        labLogo: 'https://images.unsplash.com/photo-1584515979956-d9f6e5d09982?w=200&auto=format&fit=crop&q=80',
-        labBadge: 'Best Value Deal',
-        originalPrice: 700,
-        discountPrice: 349,
-        tatHours: 12,
-        tatText: '12 Hours',
-        rating: 4.79,
-        reviewCount: 6200,
-        isNablAccredited: true,
-        isCapAccredited: true,
-        earliestSlot: '07:00 AM Tomorrow',
-        sampleType: 'Blood (Serum)',
-        fastingRequired: '8-10 hrs Fasting',
-        homeCollectionAvailable: true,
-        centerVisitAvailable: false
-      },
-      {
-        labId: 'lab-agilus',
-        labName: 'Agilus Diagnostics',
-        labShortName: 'Agilus',
-        labLogo: 'https://images.unsplash.com/photo-1579684385127-1ef15d508118?w=200&auto=format&fit=crop&q=80',
-        labBadge: 'NABL Certified',
-        originalPrice: 850,
-        discountPrice: 450,
-        tatHours: 6,
-        tatText: '6 Hours',
-        rating: 4.9,
-        reviewCount: 3900,
-        isNablAccredited: true,
-        isCapAccredited: true,
-        earliestSlot: '06:00 AM Tomorrow',
-        sampleType: 'Blood (Serum)',
-        fastingRequired: '8-10 hrs Fasting',
-        homeCollectionAvailable: true,
-        centerVisitAvailable: true
-      },
-      {
-        labId: 'lab-drlal',
-        labName: 'Dr. Lal PathLabs',
-        labShortName: 'Dr Lal',
-        labLogo: 'https://images.unsplash.com/photo-1581595220892-b0739db3ba8c?w=200&auto=format&fit=crop&q=80',
-        labBadge: 'Automated Analyzer',
-        originalPrice: 890,
-        discountPrice: 470,
-        tatHours: 6,
-        tatText: '6 Hours',
-        rating: 4.88,
-        reviewCount: 5800,
-        isNablAccredited: true,
-        isCapAccredited: true,
-        earliestSlot: '06:30 AM Tomorrow',
-        sampleType: 'Blood (Serum)',
-        fastingRequired: '8-10 hrs Fasting',
-        homeCollectionAvailable: true,
-        centerVisitAvailable: true
-      }
-    ]
-  },
-  {
-    id: 't-kft-08',
-    name: 'Kidney Function Test (KFT / RFT) with Electrolytes',
-    code: 'REN002',
-    category: 'Liver & Kidney',
-    sampleType: 'Blood (Serum)',
-    fastingRequired: 'Non-Fasting',
-    tatHours: 6,
-    originalPrice: 950,
-    discountPrice: 480,
-    parametersCount: 7,
-    parametersList: ['Serum Creatinine', 'Blood Urea Nitrogen (BUN)', 'Uric Acid', 'eGFR (Calculated)', 'Serum Sodium (Na+)', 'Serum Potassium (K+)', 'Serum Chloride (Cl-)'],
-    description: 'Screens renal filtration efficiency, electrolyte balance, and detects early signs of chronic kidney disease or gout.',
-    whyTakeThisTest: 'Crucial for hypertensive and diabetic patients, leg swelling (edema), high uric acid pain in toes, or medication monitoring.',
-    preparationInstructions: ['No strict fasting required, but stay well hydrated.'],
-    isPopular: true,
-    labOfferings: [
-      {
-        labId: 'lab-thyrocare',
-        labName: 'Thyrocare Technologies',
-        labShortName: 'Thyrocare',
-        labLogo: 'https://images.unsplash.com/photo-1584515979956-d9f6e5d09982?w=200&auto=format&fit=crop&q=80',
-        labBadge: 'Lowest Price',
-        originalPrice: 750,
-        discountPrice: 380,
-        tatHours: 12,
-        tatText: '12 Hours',
-        rating: 4.79,
-        reviewCount: 4700,
-        isNablAccredited: true,
-        isCapAccredited: true,
-        earliestSlot: '07:00 AM Tomorrow',
-        sampleType: 'Blood (Serum)',
-        fastingRequired: 'Non-Fasting',
-        homeCollectionAvailable: true,
-        centerVisitAvailable: false
-      },
-      {
-        labId: 'lab-agilus',
-        labName: 'Agilus Diagnostics',
-        labShortName: 'Agilus',
-        labLogo: 'https://images.unsplash.com/photo-1579684385127-1ef15d508118?w=200&auto=format&fit=crop&q=80',
-        labBadge: 'NABL Certified',
-        originalPrice: 950,
-        discountPrice: 480,
-        tatHours: 6,
-        tatText: '6 Hours',
-        rating: 4.9,
-        reviewCount: 3600,
-        isNablAccredited: true,
-        isCapAccredited: true,
-        earliestSlot: '06:00 AM Tomorrow',
-        sampleType: 'Blood (Serum)',
-        fastingRequired: 'Non-Fasting',
-        homeCollectionAvailable: true,
-        centerVisitAvailable: true
-      },
-      {
-        labId: 'lab-drlal',
-        labName: 'Dr. Lal PathLabs',
-        labShortName: 'Dr Lal',
-        labLogo: 'https://images.unsplash.com/photo-1581595220892-b0739db3ba8c?w=200&auto=format&fit=crop&q=80',
-        labBadge: 'Most Popular',
-        originalPrice: 980,
-        discountPrice: 499,
-        tatHours: 6,
-        tatText: '6 Hours',
-        rating: 4.88,
-        reviewCount: 6100,
-        isNablAccredited: true,
-        isCapAccredited: true,
-        earliestSlot: '06:30 AM Tomorrow',
-        sampleType: 'Blood (Serum)',
-        fastingRequired: 'Non-Fasting',
-        homeCollectionAvailable: true,
-        centerVisitAvailable: true
-      }
-    ]
-  },
-  {
-    id: 't-fever-10',
-    name: 'Fever Profile Comprehensive (Dengue, Malaria, Typhoid, CBC, Urine)',
-    code: 'FEV005',
-    category: 'Seasonal & Fever',
-    sampleType: 'Blood + Spot Urine',
-    fastingRequired: 'Non-Fasting',
-    tatHours: 6,
-    originalPrice: 2200,
-    discountPrice: 999,
-    parametersCount: 32,
-    parametersList: ['Dengue NS1 Antigen (ELISA)', 'Dengue IgG & IgM Antibodies', 'Malarial Antigen (Pv/Pf Rapid)', 'Typhoid Widal Slide Test & Typhidot IgM', 'CBC with Platelet Count & PS for MP', 'Urine Routine & Microscopic', 'SGPT/ALT Liver Enzyme'],
-    description: 'Rapid, single-prick differential screening for acute high-grade fever in North Indian endemic zones.',
-    whyTakeThisTest: 'High fever (>101°F) for more than 48 hours with chills, body aches, retro-orbital headache, or drop in platelets.',
-    preparationInstructions: ['Sample can be collected at any hour. No fasting required.'],
-    isPopular: true,
-    isWinterSeasonal: true,
-    labOfferings: [
-      {
-        labId: 'lab-agilus',
-        labName: 'Agilus Diagnostics',
-        labShortName: 'Agilus',
-        labLogo: 'https://images.unsplash.com/photo-1579684385127-1ef15d508118?w=200&auto=format&fit=crop&q=80',
-        labBadge: 'Express 6-Hr TAT',
-        originalPrice: 2200,
-        discountPrice: 999,
-        tatHours: 6,
-        tatText: '6 Hours',
-        rating: 4.9,
-        reviewCount: 4500,
-        isNablAccredited: true,
-        isCapAccredited: true,
-        earliestSlot: '06:00 AM Tomorrow',
-        sampleType: 'Blood + Urine',
-        fastingRequired: 'Non-Fasting',
-        homeCollectionAvailable: true,
-        centerVisitAvailable: true
-      },
-      {
-        labId: 'lab-drlal',
-        labName: 'Dr. Lal PathLabs',
-        labShortName: 'Dr Lal',
-        labLogo: 'https://images.unsplash.com/photo-1581595220892-b0739db3ba8c?w=200&auto=format&fit=crop&q=80',
-        labBadge: 'Dengue ELISA Certified',
-        originalPrice: 2300,
-        discountPrice: 1050,
-        tatHours: 6,
-        tatText: '6 Hours',
-        rating: 4.88,
-        reviewCount: 6700,
-        isNablAccredited: true,
-        isCapAccredited: true,
-        earliestSlot: '06:30 AM Tomorrow',
-        sampleType: 'Blood + Urine',
-        fastingRequired: 'Non-Fasting',
-        homeCollectionAvailable: true,
-        centerVisitAvailable: true
-      },
-      {
-        labId: 'lab-maxlab',
-        labName: 'Max Lab',
-        labShortName: 'Max Lab',
-        labLogo: 'https://images.unsplash.com/photo-1516549655169-df83a0774514?w=200&auto=format&fit=crop&q=80',
-        labBadge: 'Hospital Emergency Grade',
-        originalPrice: 2600,
-        discountPrice: 1200,
-        tatHours: 4,
-        tatText: '4 Hours Rapid',
-        rating: 4.95,
-        reviewCount: 2400,
-        isNablAccredited: true,
-        isCapAccredited: true,
-        earliestSlot: '06:00 AM Tomorrow',
-        sampleType: 'Blood + Urine',
-        fastingRequired: 'Non-Fasting',
-        homeCollectionAvailable: true,
-        centerVisitAvailable: true
-      }
-    ]
   }
 ];
 
@@ -1178,103 +856,6 @@ export const HEALTH_PACKAGES: HealthPackage[] = [
         centerVisitAvailable: true
       }
     ]
-  },
-  {
-    id: 'pkg-platinum-03',
-    name: 'Aura Platinum Executive Full Body Checkup with Vitamins & Cardiac',
-    tagline: 'Gold Standard 360° Health Assessment with Advanced Biomarkers',
-    badge: 'Best Value',
-    category: 'Full Body',
-    originalPrice: 6500,
-    discountPrice: 2299,
-    parametersCount: 96,
-    sampleType: 'Blood + Urine',
-    fastingRequired: '10-12 hrs Fasting',
-    tatHours: 10,
-    idealFor: 'Complete organ screening, executives, middle-aged adults, individuals with family history of chronic disease',
-    ageGroup: '30+ Years',
-    gender: 'ALL',
-    highlights: [
-      'Everything in Active Package (CBC, LFT, KFT, Lipid)',
-      'HbA1c Glycosylated Hemoglobin (3-Month Sugar Average)',
-      'Vitamin D 25-OH & Vitamin B12 Levels',
-      'Thyroid Profile Total (T3, T4, TSH)',
-      'Iron Profile Comprehensive (Ferritin & TIBC)',
-      'High-Sensitivity CRP (Cardiac Risk Indicator)',
-      'Free Home Sample Collection & Priority 10-Hour Report'
-    ],
-    testsIncluded: [
-      { categoryName: 'Vitamins & Minerals (7)', testNames: ['Vitamin D 25-OH', 'Vitamin B12', 'Serum Iron', 'Ferritin', 'TIBC', 'Calcium', 'Phosphorus'] },
-      { categoryName: 'Diabetes 3-Month Control (4)', testNames: ['HbA1c', 'eAG', 'Fasting Blood Sugar', 'Insulin Fasting'] },
-      { categoryName: 'Cardiac & Inflammatory (9)', testNames: ['Lipid Profile', 'hs-CRP', 'Atherogenic Index'] },
-      { categoryName: 'Thyroid Panel (3)', testNames: ['Total T3', 'Total T4', 'TSH Ultra-sensitive'] },
-      { categoryName: 'Hemogram & Bone Health (26)', testNames: ['CBC with ESR', 'Uric Acid', 'Alkaline Phosphatase'] },
-      { categoryName: 'Liver & Renal Profiles (18)', testNames: ['Full LFT (11)', 'Full KFT with Electrolytes (7)'] },
-      { categoryName: 'Urine Microscopic (29)', testNames: ['Full Urine Routine & Sediment Examination'] }
-    ],
-    description: 'The most comprehensive pathology evaluation covering vitamins, hormones, heart risk, liver, kidneys, and metabolic health.',
-    labOfferings: [
-      {
-        labId: 'lab-thyrocare',
-        labName: 'Thyrocare Technologies',
-        labShortName: 'Thyrocare',
-        labLogo: 'https://images.unsplash.com/photo-1584515979956-d9f6e5d09982?w=200&auto=format&fit=crop&q=80',
-        labBadge: 'Best Value Price',
-        originalPrice: 5500,
-        discountPrice: 1899,
-        tatHours: 12,
-        tatText: '12 Hours',
-        rating: 4.79,
-        reviewCount: 9800,
-        isNablAccredited: true,
-        isCapAccredited: true,
-        earliestSlot: '07:00 AM Tomorrow',
-        sampleType: 'Blood + Urine',
-        fastingRequired: '10-12 hrs Fasting',
-        homeCollectionAvailable: true,
-        centerVisitAvailable: false
-      },
-      {
-        labId: 'lab-agilus',
-        labName: 'Agilus Diagnostics',
-        labShortName: 'Agilus',
-        labLogo: 'https://images.unsplash.com/photo-1579684385127-1ef15d508118?w=200&auto=format&fit=crop&q=80',
-        labBadge: 'NABL & CAP Certified',
-        originalPrice: 6500,
-        discountPrice: 2299,
-        tatHours: 10,
-        tatText: '10 Hours',
-        rating: 4.9,
-        reviewCount: 6800,
-        isNablAccredited: true,
-        isCapAccredited: true,
-        earliestSlot: '06:00 AM Tomorrow',
-        sampleType: 'Blood + Urine',
-        fastingRequired: '10-12 hrs Fasting',
-        homeCollectionAvailable: true,
-        centerVisitAvailable: true
-      },
-      {
-        labId: 'lab-maxlab',
-        labName: 'Max Lab',
-        labShortName: 'Max Lab',
-        labLogo: 'https://images.unsplash.com/photo-1516549655169-df83a0774514?w=200&auto=format&fit=crop&q=80',
-        labBadge: 'Hospital Grade Precision',
-        originalPrice: 7200,
-        discountPrice: 2699,
-        tatHours: 6,
-        tatText: '6 Hours Express',
-        rating: 4.95,
-        reviewCount: 3800,
-        isNablAccredited: true,
-        isCapAccredited: true,
-        earliestSlot: '06:00 AM Tomorrow',
-        sampleType: 'Blood + Urine',
-        fastingRequired: '10-12 hrs Fasting',
-        homeCollectionAvailable: true,
-        centerVisitAvailable: true
-      }
-    ]
   }
 ];
 
@@ -1297,44 +878,6 @@ export const DOCTOR_SPECIALISTS: Doctor[] = [
     about: 'Leading diagnostic specialist with 22+ years interpreting complex biochemistry, autoimmune markers, and abnormal hematology results for North Indian patients.',
     availableSlotsToday: ['04:00 PM', '04:30 PM', '05:00 PM', '05:30 PM', '06:00 PM'],
     availableModes: ['VIDEO', 'IN_CLINIC']
-  },
-  {
-    id: 'doc-02',
-    name: 'Dr. Vikramaditya Rathore',
-    title: 'Senior Consultant Pulmonologist & Smog Specialist',
-    specialty: 'Pulmonologist (Chest & Smog)',
-    degrees: 'MBBS, MD (Chest & Respiratory - PGIMER Chandigarh), DM (Pulmonology)',
-    institution: 'PGIMER Chandigarh Alumnus',
-    experienceYears: 18,
-    languages: ['Hindi', 'English', 'Punjabi'],
-    rating: 4.95,
-    reviewCount: 310,
-    consultationFee: 650,
-    isFreeReportReviewAvailable: false,
-    avatarUrl: 'https://images.unsplash.com/photo-1622253692010-333f2da6031d?w=500&auto=format&fit=crop&q=80',
-    city: 'Chandigarh & Delhi NCR',
-    about: 'Expert in treating North Indian winter smog asthma, COPD exacerbations, post-viral chronic cough, and aeroallergen airway hyperreactivity.',
-    availableSlotsToday: ['05:00 PM', '06:00 PM', '06:30 PM', '07:00 PM'],
-    availableModes: ['VIDEO', 'IN_CLINIC']
-  },
-  {
-    id: 'doc-03',
-    name: 'Dr. Amit Malhotra',
-    title: 'Consultant Diabetologist & Endocrinologist',
-    specialty: 'Diabetologist & Endocrinologist',
-    degrees: 'MBBS, MD (Medicine), DM (Endocrinology - KGMU Lucknow)',
-    institution: 'KGMU Lucknow Alumnus',
-    experienceYears: 15,
-    languages: ['Hindi', 'English'],
-    rating: 4.88,
-    reviewCount: 275,
-    consultationFee: 600,
-    isFreeReportReviewAvailable: false,
-    avatarUrl: 'https://images.unsplash.com/photo-1537368910025-700350fe46c7?w=500&auto=format&fit=crop&q=80',
-    city: 'Lucknow & Delhi NCR',
-    about: 'Specialized in reversible prediabetes management, insulin resistance reversal, thyroid disorders, and diet planning for North Indian carbohydrate habits.',
-    availableSlotsToday: ['03:30 PM', '04:00 PM', '05:15 PM', '06:45 PM'],
-    availableModes: ['VIDEO', 'IN_CLINIC']
   }
 ];
 
@@ -1356,60 +899,6 @@ export const LAB_CENTERS: LabCenter[] = [
     isRegionalReferenceLab: true,
     facilities: ['Pathology Reference Lab', 'Digital X-Ray', '4D Ultrasound', '128-Slice CT Scan', '1.5T MRI', 'ECHO & TMT'],
     mapEmbedQuery: 'Green Park New Delhi'
-  },
-  {
-    id: 'lab-del-02',
-    name: 'Dr. Lal PathLabs National Reference Lab - Rohini',
-    labBrandId: 'lab-drlal',
-    labBrandName: 'Dr. Lal PathLabs',
-    state: 'Delhi NCR',
-    city: 'New Delhi',
-    area: 'Rohini Sector 18',
-    address: 'Block E, Sector 18, Rohini, New Delhi, Delhi 110085',
-    pincode: '110085',
-    phone: '+91 11 3988 5050',
-    operatingHours: '6:00 AM - 10:00 PM',
-    email: 'rohini.nrl@lalpathlabs.com',
-    isNablAccredited: true,
-    isRegionalReferenceLab: true,
-    facilities: ['National Reference Pathology', 'Molecular PCR', 'Flow Cytometry', 'Express Report Kiosk'],
-    mapEmbedQuery: 'Rohini Sector 18 New Delhi'
-  },
-  {
-    id: 'lab-gur-03',
-    name: 'Max Lab Super-Speciality Diagnostic Hub - Gurugram',
-    labBrandId: 'lab-maxlab',
-    labBrandName: 'Max Lab',
-    state: 'Delhi NCR',
-    city: 'Gurugram (Gurgaon)',
-    area: 'Sushant Lok 1',
-    address: 'B-Block, Sushant Lok 1, Near HUDA City Centre, Gurugram, Haryana 122001',
-    pincode: '122001',
-    phone: '+91 124 662 3000',
-    operatingHours: '6:00 AM - 10:00 PM',
-    email: 'gurgaon@maxlab.co.in',
-    isNablAccredited: true,
-    isRegionalReferenceLab: true,
-    facilities: ['Automated Biochemistry', 'Digital X-Ray', 'High-Res Ultrasound', 'TMT & Holter', 'Express 4-Hour TAT'],
-    mapEmbedQuery: 'Sushant Lok Gurgaon'
-  },
-  {
-    id: 'lab-chd-05',
-    name: 'Agilus Regional Reference Lab - Chandigarh',
-    labBrandId: 'lab-agilus',
-    labBrandName: 'Agilus Diagnostics',
-    state: 'Chandigarh',
-    city: 'Chandigarh (Tricity)',
-    area: 'Sector 35-B',
-    address: 'SCO 210-211, Dakshin Marg, Sector 35-B, Chandigarh 160022',
-    pincode: '160022',
-    phone: '+91 172 509 9900',
-    operatingHours: '6:30 AM - 9:30 PM',
-    email: 'chandigarh@agilus.in',
-    isNablAccredited: true,
-    isRegionalReferenceLab: true,
-    facilities: ['Punjab Reference Pathology', 'Digital X-Ray', 'Fibroscan', '4D Ultrasound', 'Tricity Fasting Fleet'],
-    mapEmbedQuery: 'Sector 35B Chandigarh'
   }
 ];
 
@@ -1419,8 +908,8 @@ export const SAMPLE_REPORTS: DiagnosticReport[] = [
     reportNumber: 'AUR-DEL-2026-89421',
     bookingNumber: 'BK-992144',
     barcode: '||||| | |||| ||| |||| | |||',
-    patientName: 'Rajesh Sharma',
-    patientAge: 48,
+    patientName: 'New Patient',
+    patientAge: 45,
     patientGender: 'Male',
     patientPhone: '+91 98765 43210',
     referringDoctor: 'Dr. V. K. Gupta, MD (Cardiology)',
@@ -1434,75 +923,22 @@ export const SAMPLE_REPORTS: DiagnosticReport[] = [
       {
         groupName: 'Complete Blood Count (CBC) with ESR',
         parameters: [
-          { name: 'Hemoglobin (Hb)', resultValue: '14.2', numericValue: 14.2, unit: 'g/dL', referenceRange: '13.0 - 17.0', status: 'NORMAL', methodology: 'Photometric / Cyanmethemoglobin' },
-          { name: 'Total Leucocyte Count (TLC)', resultValue: '7,800', numericValue: 7800, unit: 'cells/cu.mm', referenceRange: '4,000 - 11,000', status: 'NORMAL', methodology: 'Automated Electrical Impedance' },
-          { name: 'Platelet Count', resultValue: '2.45', numericValue: 2.45, unit: 'Lakh/cu.mm', referenceRange: '1.50 - 4.50', status: 'NORMAL', methodology: 'Laser Flow Cytometry' },
-          { name: 'E.S.R. (Westergren)', resultValue: '18', numericValue: 18, unit: 'mm/1st hr', referenceRange: '0 - 15', status: 'HIGH', methodology: 'Modified Westergren' }
-        ]
-      },
-      {
-        groupName: 'Diabetes & Metabolic Profile',
-        parameters: [
-          { name: 'HbA1c (Glycosylated Hemoglobin)', resultValue: '6.8', numericValue: 6.8, unit: '%', referenceRange: '< 5.7 (Normal), 5.7-6.4 (Prediabetes), >= 6.5 (Diabetes)', status: 'HIGH', methodology: 'HPLC (Bio-Rad D10)' },
-          { name: 'Estimated Average Glucose (eAG)', resultValue: '148', numericValue: 148, unit: 'mg/dL', referenceRange: '< 117 (Normal)', status: 'HIGH' }
+          { name: 'Hemoglobin (Hb)', resultValue: '14.2', numericValue: 14.2, unit: 'g/dL', referenceRange: '13.0 - 17.0', status: 'NORMAL', methodology: 'Photometric' },
+          { name: 'Total Leucocyte Count (TLC)', resultValue: '7,800', numericValue: 7800, unit: 'cells/cu.mm', referenceRange: '4,000 - 11,000', status: 'NORMAL', methodology: 'Electrical Impedance' }
         ]
       }
     ],
-    doctorRemarks: 'Findings suggest early prediabetes (HbA1c 6.8%). Recommend dietary consultation, lifestyle changes, and physician review.',
+    doctorRemarks: 'Parameters are within biological reference limits.',
     pathologist: {
       name: 'Dr. Sunita Aggarwal, MD',
       designation: 'Senior Consultant & Chief of Pathology',
-      degrees: 'MBBS, MD (Pathology, AIIMS New Delhi), Fellow CAP',
+      degrees: 'MBBS, MD (Pathology, AIIMS New Delhi)',
       signatureText: 'Electronically verified & signed'
     }
   }
 ];
 
-export const INITIAL_BOOKINGS: Booking[] = [
-  {
-    id: 'bk-01',
-    bookingNumber: 'BK-992144',
-    createdAt: '2026-08-28 06:45 AM',
-    status: 'REPORT_GENERATED',
-    bookingType: 'HOME_COLLECTION',
-    selectedLabName: 'Agilus Diagnostics',
-    selectedLabBrandId: 'lab-agilus',
-    patientDetails: {
-      name: 'Rajesh Sharma',
-      phone: '+91 98765 43210',
-      email: 'rajesh.sharma@example.com',
-      age: 48,
-      gender: 'Male',
-      address: 'Tower 4, Flat 602, DLF Phase 5',
-      city: 'Gurugram (Gurgaon)',
-      state: 'Delhi NCR',
-      pincode: '122002',
-      landmark: 'Near Club Drive'
-    },
-    beneficiaries: [
-      { id: 'ben-01', name: 'Rajesh Sharma', age: 48, gender: 'Male', relation: 'Self', phoneNumber: '+91 98765 43210' }
-    ],
-    items: [
-      { title: 'Aura North India Winter Smog & Lung Health Package', type: 'PACKAGE', price: 1499, labName: 'Agilus Diagnostics', forBeneficiaryName: 'Rajesh Sharma' }
-    ],
-    slotDate: '2026-08-28',
-    slotTime: '07:00 AM - 08:00 AM (Fasting)',
-    subtotal: 1499,
-    discount: 0,
-    collectionFee: 0,
-    totalAmount: 1499,
-    paymentMode: 'ONLINE_UPI_CARD',
-    paymentStatus: 'PAID',
-    phlebotomist: {
-      name: 'Manoj Verma',
-      phone: '+91 98112 34567',
-      badgeNumber: 'PHLEB-AGILUS-108',
-      vaccinationStatus: 'Fully Vaccinated & Verified',
-      liveLocationStatus: 'Sample delivered to Green Park Lab'
-    },
-    reportId: 'rep-aur-89421'
-  }
-];
+export const INITIAL_BOOKINGS: Booking[] = [];
 
 export const PROMO_COUPONS = [
   { code: 'NORTH20', discountPercent: 20, minOrder: 999, description: 'Flat 20% off on all North India Health Packages' },
@@ -1521,16 +957,5 @@ export const HEALTH_BLOG_POSTS = [
     image: 'https://images.unsplash.com/photo-1584467735871-8e85353a8413?w=800&auto=format&fit=crop&q=80',
     excerpt: 'Why choosing a NABL and CAP accredited laboratory ensures accurate biomarker readings and eliminates repeat sampling.',
     tags: ['NABL Labs', 'Test Accuracy', 'Lab Comparison']
-  },
-  {
-    id: 'post-02',
-    title: 'Navigating North India Winter Smog: What Blood Tests Reveal About Toxic AQI Exposure',
-    category: 'Respiratory Health',
-    readTime: '4 min read',
-    author: 'Dr. Vikramaditya Rathore, Pulmonologist',
-    date: 'August 2026',
-    image: 'https://images.unsplash.com/photo-1579684385127-1ef15d508118?w=800&auto=format&fit=crop&q=80',
-    excerpt: 'How PM2.5 particulates penetrate into the bloodstream causing silent vascular inflammation, high hs-CRP, and heightened IgE allergic responses.',
-    tags: ['Delhi Smog', 'AQI Defense', 'Lung Health']
   }
 ];

@@ -19,7 +19,7 @@ import { LabComparisonModal } from './components/LabComparisonModal';
 import { CartDrawer } from './components/CartDrawer';
 import { HomeCollectionBookingModal } from './components/HomeCollectionBookingModal';
 import { CartItem, HealthPackage, TestItem, Booking, PatientProfile, LabTestOffering } from './types';
-import { INITIAL_BOOKINGS, HEALTH_PACKAGES, MOCK_PATIENT_PROFILE, POPULAR_TESTS } from './data/mockData';
+import { INITIAL_BOOKINGS, HEALTH_PACKAGES, INITIAL_EMPTY_PATIENT_PROFILE, POPULAR_TESTS } from './data/mockData';
 import { Check } from 'lucide-react';
 
 export function App() {
@@ -27,7 +27,7 @@ export function App() {
   const [activeTab, setActiveTab] = useState<string>('home');
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
   const [bookings, setBookings] = useState<Booking[]>(INITIAL_BOOKINGS);
-  const [patientProfile, setPatientProfile] = useState<PatientProfile>(MOCK_PATIENT_PROFILE);
+  const [patientProfile, setPatientProfile] = useState<PatientProfile>(INITIAL_EMPTY_PATIENT_PROFILE);
 
   // Modals state
   const [isCityModalOpen, setIsCityModalOpen] = useState(false);
@@ -55,6 +55,11 @@ export function App() {
     }, 3500);
   };
 
+  const handleLogout = () => {
+    setPatientProfile(INITIAL_EMPTY_PATIENT_PROFILE);
+    showToast('Logged out. You can now register a new patient.');
+  };
+
   const handleOpenTestComparison = (item: TestItem | HealthPackage) => {
     setComparisonItem(item);
     setIsComparisonModalOpen(true);
@@ -77,7 +82,6 @@ export function App() {
     };
 
     if (existingIndex > -1) {
-      // Replace with new chosen lab offering
       setCartItems((prev) => {
         const copy = [...prev];
         copy[existingIndex] = newCartItem;
@@ -243,6 +247,7 @@ export function App() {
         onClose={() => setIsRegistrationModalOpen(false)}
         patientProfile={patientProfile}
         setPatientProfile={setPatientProfile}
+        onLogout={handleLogout}
         onNotify={showToast}
       />
 

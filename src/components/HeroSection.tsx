@@ -11,7 +11,8 @@ import {
   ArrowRight,
   TrendingUp,
   Building2,
-  User,
+  UserPlus,
+  UserCheck,
 } from 'lucide-react';
 import { POPULAR_TESTS, HEALTH_PACKAGES, LAB_BRANDS } from '../data/mockData';
 import { TestItem, HealthPackage, PatientProfile } from '../types';
@@ -54,34 +55,50 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
 
   return (
     <section className="relative bg-gradient-to-b from-brand-50/70 via-white to-slate-50 py-10 sm:py-16 overflow-hidden border-b border-slate-200/70">
-      {/* Background patterns */}
+      {/* Background shapes */}
       <div className="absolute top-0 right-0 w-96 h-96 bg-brand-100/40 rounded-full blur-3xl pointer-events-none -mr-20 -mt-20" />
       <div className="absolute bottom-0 left-0 w-80 h-80 bg-teal-100/30 rounded-full blur-3xl pointer-events-none -ml-20 -mb-20" />
 
       <div className="max-w-7xl mx-auto px-4 sm:px-8 relative z-10 space-y-8">
         {/* Step Indicator Banner */}
         <div className="flex flex-wrap items-center justify-between gap-3 bg-white p-3.5 sm:p-4 rounded-3xl border border-slate-200/90 shadow-sm max-w-4xl mx-auto">
-          {/* Step 1 */}
+          {/* Step 1: Patient Registration */}
           <button
             onClick={onOpenRegistrationModal}
-            className="flex items-center gap-2.5 text-left p-2 rounded-2xl hover:bg-slate-50 transition flex-1 min-w-[200px]"
+            className={`flex items-center gap-2.5 text-left p-2 rounded-2xl transition flex-1 min-w-[200px] border ${
+              patientProfile.isLoggedIn
+                ? 'bg-slate-50 border-slate-200 hover:bg-slate-100'
+                : 'bg-amber-50 border-amber-300 hover:bg-amber-100/80 ring-2 ring-amber-400/30 animate-pulse'
+            }`}
           >
-            <div className="w-8 h-8 rounded-xl bg-brand-100 text-brand-700 font-black flex items-center justify-center text-xs shrink-0">
-              1
+            <div
+              className={`w-8 h-8 rounded-xl font-black flex items-center justify-center text-xs shrink-0 ${
+                patientProfile.isLoggedIn
+                  ? 'bg-emerald-100 text-emerald-800'
+                  : 'bg-brand-coral text-white'
+              }`}
+            >
+              {patientProfile.isLoggedIn ? '✓' : '1'}
             </div>
             <div>
-              <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">
-                Step 1: Patient Profile
+              <span className="text-[10px] font-extrabold uppercase tracking-wider text-slate-500 block">
+                Step 1: Patient Registration
               </span>
-              <span className="text-xs font-bold text-brand-navy truncate block">
-                {patientProfile.isLoggedIn ? `👤 ${patientProfile.fullName}` : 'Register / Sign In'}
+              <span
+                className={`text-xs font-black truncate block ${
+                  patientProfile.isLoggedIn ? 'text-emerald-800' : 'text-brand-coral'
+                }`}
+              >
+                {patientProfile.isLoggedIn
+                  ? `👤 ${patientProfile.fullName}`
+                  : '+ Register Patient Profile'}
               </span>
             </div>
           </button>
 
           <div className="hidden sm:block h-6 w-px bg-slate-200" />
 
-          {/* Step 2 */}
+          {/* Step 2: Type Test Name */}
           <div className="flex items-center gap-2.5 p-2 flex-1 min-w-[200px]">
             <div className="w-8 h-8 rounded-xl bg-teal-100 text-teal-800 font-black flex items-center justify-center text-xs shrink-0">
               2
@@ -91,14 +108,14 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
                 Step 2: Type Test Name
               </span>
               <span className="text-xs font-bold text-teal-900 block">
-                Search CBC, HbA1c, etc.
+                Search CBC, HbA1c, Vitamin D...
               </span>
             </div>
           </div>
 
           <div className="hidden sm:block h-6 w-px bg-slate-200" />
 
-          {/* Step 3 */}
+          {/* Step 3: Compare Labs */}
           <div className="flex items-center gap-2.5 p-2 flex-1 min-w-[200px]">
             <div className="w-8 h-8 rounded-xl bg-amber-100 text-amber-900 font-black flex items-center justify-center text-xs shrink-0">
               3

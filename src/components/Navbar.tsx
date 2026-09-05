@@ -16,6 +16,7 @@ import {
   Stethoscope,
   Building2,
   User,
+  UserPlus,
 } from 'lucide-react';
 import { PatientProfile } from '../types';
 
@@ -83,12 +84,23 @@ export const Navbar: React.FC<NavbarProps> = ({
             {/* Patient Registration / Profile Trigger */}
             <button
               onClick={onOpenRegistrationModal}
-              className="flex items-center gap-1.5 bg-brand-500/20 hover:bg-brand-500/30 text-white px-3 py-0.5 rounded-full border border-brand-500/40 text-[11px] font-bold transition"
+              className={`flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-black transition ${
+                patientProfile.isLoggedIn
+                  ? 'bg-brand-500/30 text-white border border-brand-500/50'
+                  : 'bg-gradient-to-r from-brand-coral to-amber-500 text-white shadow-sm hover:opacity-95 ring-2 ring-amber-400/30'
+              }`}
             >
-              <User className="w-3 h-3 text-brand-teal" />
-              <span>
-                {patientProfile.isLoggedIn ? `Hello, ${patientProfile.fullName.split(' ')[0]}` : 'Patient Register / Login'}
-              </span>
+              {patientProfile.isLoggedIn ? (
+                <>
+                  <User className="w-3.5 h-3.5 text-brand-teal" />
+                  <span>Hello, {patientProfile.fullName.split(' ')[0]}</span>
+                </>
+              ) : (
+                <>
+                  <UserPlus className="w-3.5 h-3.5" />
+                  <span>Register / Sign In</span>
+                </>
+              )}
             </button>
 
             <span className="hidden sm:flex items-center gap-1 text-slate-300">
@@ -273,10 +285,20 @@ export const Navbar: React.FC<NavbarProps> = ({
               setMobileMenuOpen(false);
               onOpenRegistrationModal();
             }}
-            className="w-full p-3 text-left bg-brand-50 rounded-xl text-xs font-bold text-brand-navy border border-brand-200 flex items-center justify-between"
+            className={`w-full p-3 text-left rounded-xl text-xs font-bold flex items-center justify-between transition ${
+              patientProfile.isLoggedIn
+                ? 'bg-brand-50 text-brand-navy border border-brand-200'
+                : 'bg-gradient-to-r from-brand-coral to-amber-500 text-white shadow-sm'
+            }`}
           >
-            <span>👤 {patientProfile.isLoggedIn ? patientProfile.fullName : 'Register / Sign In'}</span>
-            <span className="text-[10px] text-brand-teal">Edit Profile →</span>
+            <span>
+              {patientProfile.isLoggedIn
+                ? `👤 Hello, ${patientProfile.fullName}`
+                : '👤 Register Patient / Sign In'}
+            </span>
+            <span className="text-[10px] underline">
+              {patientProfile.isLoggedIn ? 'Edit Profile →' : 'Register Now →'}
+            </span>
           </button>
 
           <div
