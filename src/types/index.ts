@@ -70,7 +70,7 @@ export interface HealthPackage {
   name: string;
   tagline: string;
   badge?: string;
-  category: 'Full Body' | 'Senior Citizen' | 'Winter & Respiratory' | 'Women Wellness' | 'Men Health' | 'Diabetes & Heart';
+  category: 'Full Body' | 'Senior Citizen' | 'Winter & Respiratory' | 'Women Wellness' | 'Men Health' | 'Diabetes & Heart' | 'Seasonal & Fever';
   originalPrice: number;
   discountPrice: number;
   parametersCount: number;

@@ -207,7 +207,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 onFocus={() => setIsSearchFocused(true)}
-                placeholder="Type test name (e.g. CBC, HbA1c, Vitamin D, Thyroid, Lipid, Smog)..."
+                placeholder="Type test name (e.g. Dengue, Fever, CBC, HbA1c, LFT, KFT, Vitamin D, Smog)..."
                 className="w-full pl-10 pr-4 py-2.5 text-xs sm:text-sm bg-transparent border-none focus:outline-none text-slate-800 placeholder:text-slate-400 font-medium"
               />
               {searchQuery && (
@@ -276,7 +276,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
 
               {filteredTests.length === 0 && (
                 <div className="p-6 text-center text-xs text-slate-500">
-                  No direct test matches for &ldquo;{searchQuery}&rdquo;. Try typing &ldquo;CBC&rdquo;, &ldquo;HbA1c&rdquo;, &ldquo;Vitamin D&rdquo;, or upload your prescription.
+                  No direct test matches for &ldquo;{searchQuery}&rdquo;. Try typing &ldquo;Dengue&rdquo;, &ldquo;Fever&rdquo;, &ldquo;CBC&rdquo;, &ldquo;HbA1c&rdquo;, or upload your prescription.
                 </div>
               )}
             </div>
@@ -286,7 +286,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
         {/* Quick Test Search Chips */}
         <div className="flex flex-wrap items-center justify-center gap-2 text-xs">
           <span className="text-slate-400 font-semibold text-xs mr-1">Popular Tests:</span>
-          {POPULAR_TESTS.slice(0, 6).map((t) => (
+          {POPULAR_TESTS.slice(0, 8).map((t) => (
             <button
               key={t.id}
               onClick={() => onOpenTestComparison(t)}
