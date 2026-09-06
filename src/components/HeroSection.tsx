@@ -13,6 +13,8 @@ import {
   Building2,
   UserPlus,
   UserCheck,
+  Stethoscope,
+  Video,
 } from 'lucide-react';
 import { POPULAR_TESTS, HEALTH_PACKAGES, LAB_BRANDS } from '../data/mockData';
 import { TestItem, HealthPackage, PatientProfile } from '../types';
@@ -25,6 +27,7 @@ interface HeroSectionProps {
   patientProfile: PatientProfile;
   onOpenTestComparison: (item: TestItem | HealthPackage) => void;
   searchInputRef: React.RefObject<HTMLInputElement>;
+  onOpenDoctorConsult?: () => void;
 }
 
 export const HeroSection: React.FC<HeroSectionProps> = ({
@@ -35,6 +38,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
   patientProfile,
   onOpenTestComparison,
   searchInputRef,
+  onOpenDoctorConsult,
 }) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [isSearchFocused, setIsSearchFocused] = useState(false);
@@ -60,75 +64,104 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
       <div className="absolute bottom-0 left-0 w-80 h-80 bg-teal-100/30 rounded-full blur-3xl pointer-events-none -ml-20 -mb-20" />
 
       <div className="max-w-7xl mx-auto px-4 sm:px-8 relative z-10 space-y-8">
-        {/* Step Indicator Banner */}
-        <div className="flex flex-wrap items-center justify-between gap-3 bg-white p-3.5 sm:p-4 rounded-3xl border border-slate-200/90 shadow-sm max-w-4xl mx-auto">
-          {/* Step 1: Patient Registration */}
-          <button
-            onClick={onOpenRegistrationModal}
-            className={`flex items-center gap-2.5 text-left p-2 rounded-2xl transition flex-1 min-w-[200px] border ${
-              patientProfile.isLoggedIn
-                ? 'bg-slate-50 border-slate-200 hover:bg-slate-100'
-                : 'bg-amber-50 border-amber-300 hover:bg-amber-100/80 ring-2 ring-amber-400/30 animate-pulse'
-            }`}
-          >
-            <div
-              className={`w-8 h-8 rounded-xl font-black flex items-center justify-center text-xs shrink-0 ${
+        {/* Step Indicator & Doctor Teleconsult Banner */}
+        <div className="space-y-3 max-w-4xl mx-auto">
+          {/* Step Flow Banner */}
+          <div className="flex flex-wrap items-center justify-between gap-3 bg-white p-3.5 sm:p-4 rounded-3xl border border-slate-200/90 shadow-sm">
+            {/* Step 1: Patient Registration */}
+            <button
+              onClick={onOpenRegistrationModal}
+              className={`flex items-center gap-2.5 text-left p-2 rounded-2xl transition flex-1 min-w-[200px] border ${
                 patientProfile.isLoggedIn
-                  ? 'bg-emerald-100 text-emerald-800'
-                  : 'bg-brand-coral text-white'
+                  ? 'bg-slate-50 border-slate-200 hover:bg-slate-100'
+                  : 'bg-amber-50 border-amber-300 hover:bg-amber-100/80 ring-2 ring-amber-400/30 animate-pulse'
               }`}
             >
-              {patientProfile.isLoggedIn ? '✓' : '1'}
-            </div>
-            <div>
-              <span className="text-[10px] font-extrabold uppercase tracking-wider text-slate-500 block">
-                Step 1: Patient Registration
-              </span>
-              <span
-                className={`text-xs font-black truncate block ${
-                  patientProfile.isLoggedIn ? 'text-emerald-800' : 'text-brand-coral'
+              <div
+                className={`w-8 h-8 rounded-xl font-black flex items-center justify-center text-xs shrink-0 ${
+                  patientProfile.isLoggedIn
+                    ? 'bg-emerald-100 text-emerald-800'
+                    : 'bg-brand-coral text-white'
                 }`}
               >
-                {patientProfile.isLoggedIn
-                  ? `👤 ${patientProfile.fullName}`
-                  : '+ Register Patient Profile'}
-              </span>
-            </div>
-          </button>
+                {patientProfile.isLoggedIn ? '✓' : '1'}
+              </div>
+              <div>
+                <span className="text-[10px] font-extrabold uppercase tracking-wider text-slate-500 block">
+                  Step 1: Patient Registration
+                </span>
+                <span
+                  className={`text-xs font-black truncate block ${
+                    patientProfile.isLoggedIn ? 'text-emerald-800' : 'text-brand-coral'
+                  }`}
+                >
+                  {patientProfile.isLoggedIn
+                    ? `👤 ${patientProfile.fullName}`
+                    : '+ Register Patient Profile'}
+                </span>
+              </div>
+            </button>
 
-          <div className="hidden sm:block h-6 w-px bg-slate-200" />
+            <div className="hidden sm:block h-6 w-px bg-slate-200" />
 
-          {/* Step 2: Type Test Name */}
-          <div className="flex items-center gap-2.5 p-2 flex-1 min-w-[200px]">
-            <div className="w-8 h-8 rounded-xl bg-teal-100 text-teal-800 font-black flex items-center justify-center text-xs shrink-0">
-              2
+            {/* Step 2: Type Test Name */}
+            <div className="flex items-center gap-2.5 p-2 flex-1 min-w-[200px]">
+              <div className="w-8 h-8 rounded-xl bg-teal-100 text-teal-800 font-black flex items-center justify-center text-xs shrink-0">
+                2
+              </div>
+              <div>
+                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">
+                  Step 2: Type Test Name
+                </span>
+                <span className="text-xs font-bold text-teal-900 block">
+                  Search CBC, HbA1c, Vitamin D...
+                </span>
+              </div>
             </div>
-            <div>
-              <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">
-                Step 2: Type Test Name
-              </span>
-              <span className="text-xs font-bold text-teal-900 block">
-                Search CBC, HbA1c, Vitamin D...
-              </span>
+
+            <div className="hidden sm:block h-6 w-px bg-slate-200" />
+
+            {/* Step 3: Compare Labs */}
+            <div className="flex items-center gap-2.5 p-2 flex-1 min-w-[200px]">
+              <div className="w-8 h-8 rounded-xl bg-amber-100 text-amber-900 font-black flex items-center justify-center text-xs shrink-0">
+                3
+              </div>
+              <div>
+                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">
+                  Step 3: Compare &amp; Book
+                </span>
+                <span className="text-xs font-bold text-amber-900 block">
+                  Compare 7 Lab Chains
+                </span>
+              </div>
             </div>
           </div>
 
-          <div className="hidden sm:block h-6 w-px bg-slate-200" />
-
-          {/* Step 3: Compare Labs */}
-          <div className="flex items-center gap-2.5 p-2 flex-1 min-w-[200px]">
-            <div className="w-8 h-8 rounded-xl bg-amber-100 text-amber-900 font-black flex items-center justify-center text-xs shrink-0">
-              3
+          {/* Quick Doctor Consultation Prompt */}
+          {onOpenDoctorConsult && (
+            <div
+              onClick={onOpenDoctorConsult}
+              className="bg-gradient-to-r from-brand-navy via-brand-darkBlue to-brand-800 hover:opacity-95 text-white p-3 rounded-2xl flex items-center justify-between gap-3 shadow-md cursor-pointer transition border border-teal-500/30"
+            >
+              <div className="flex items-center gap-2.5">
+                <div className="w-8 h-8 rounded-xl bg-teal-500/20 text-brand-teal flex items-center justify-center shrink-0">
+                  <Stethoscope className="w-4 h-4" />
+                </div>
+                <div>
+                  <span className="text-xs font-bold text-white block">
+                    Need Advice or Test Interpretation? Consult AIIMS &amp; PGI Specialist Doctors
+                  </span>
+                  <span className="text-[11px] text-teal-300 block">
+                    Free 10-Min Report Review · Video Teleconsultation in 15 Minutes
+                  </span>
+                </div>
+              </div>
+              <button className="px-3.5 py-1.5 bg-teal-500 hover:bg-teal-400 text-brand-navy text-xs font-black rounded-xl transition flex items-center gap-1 shrink-0 shadow">
+                <span>Book Doctor</span>
+                <ArrowRight className="w-3.5 h-3.5" />
+              </button>
             </div>
-            <div>
-              <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">
-                Step 3: Compare &amp; Book
-              </span>
-              <span className="text-xs font-bold text-amber-900 block">
-                Compare 7 Lab Chains
-              </span>
-            </div>
-          </div>
+          )}
         </div>
 
         {/* Main Hero Header */}

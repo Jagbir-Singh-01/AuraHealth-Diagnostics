@@ -18,6 +18,12 @@ import {
   MessageSquare,
   Award,
   FileText,
+  ChevronDown,
+  ChevronUp,
+  HeartHandshake,
+  Lock,
+  Check,
+  Zap,
 } from 'lucide-react';
 import { DOCTOR_SPECIALISTS, NORTH_INDIA_CITIES } from '../data/mockData';
 import { Doctor, DoctorAppointment } from '../types';
@@ -32,6 +38,7 @@ export const DoctorConsultation: React.FC<DoctorConsultationProps> = ({ selected
   const [consultationMode, setConsultationMode] = useState<'ALL' | 'VIDEO' | 'IN_CLINIC'>('ALL');
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [selectedDoctor, setSelectedDoctor] = useState<Doctor | null>(null);
+  const [expandedFaq, setExpandedFaq] = useState<number | null>(0);
 
   // Booking Modal State
   const [bookingMode, setBookingMode] = useState<'VIDEO' | 'IN_CLINIC'>('VIDEO');
@@ -48,13 +55,56 @@ export const DoctorConsultation: React.FC<DoctorConsultationProps> = ({ selected
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
 
   const specialties = [
-    { id: 'ALL', label: 'All Specialists' },
-    { id: 'Pathologist & Lab Report Consultant', label: '🔬 Free Report Interpretation' },
-    { id: 'Pulmonologist (Chest & Smog)', label: '🌫️ Pulmonology & Winter Smog' },
-    { id: 'Diabetologist & Endocrinologist', label: '🩺 Diabetes & Thyroid' },
-    { id: 'Cardiologist', label: '❤️ Heart & Cardiac Risk' },
-    { id: 'Gynecologist', label: '🌸 Gynecology & PCOD' },
-    { id: 'General Physician', label: '🩺 General Physician' },
+    { id: 'ALL', label: 'All Specialists', count: DOCTOR_SPECIALISTS.length },
+    { id: 'Pathologist & Lab Report Consultant', label: '🔬 Free Report Interpretation', count: 1 },
+    { id: 'Pulmonologist (Chest & Smog)', label: '🌫️ Pulmonology & Winter Smog', count: 1 },
+    { id: 'Diabetologist & Endocrinologist', label: '🩺 Diabetes & Thyroid', count: 1 },
+    { id: 'Cardiologist', label: '❤️ Heart & Cardiac Risk', count: 1 },
+    { id: 'Gynecologist', label: '🌸 Gynecology & PCOD', count: 1 },
+    { id: 'General Physician', label: '🩺 General Physician', count: 1 },
+  ];
+
+  const faqs = [
+    {
+      q: 'How does the Free 10-Minute Report Interpretation work?',
+      a: 'Whenever you book any blood test or health checkup on AuraHealth Diagnostics, you automatically get an optional complimentary 10-minute video session with our Senior Pathologist Dr. Sunita Aggarwal (AIIMS New Delhi) to review out-of-range parameters, fasting sugars, liver/kidney biomarkers, and next steps.',
+    },
+    {
+      q: 'Are digital prescriptions issued during video consultations legally valid?',
+      a: 'Yes, 100%. All doctors on our platform are NMC (National Medical Commission) registered. Digital e-prescriptions generated bear the physician’s registration number and digital signature, making them valid at all retail pharmacies, Apollo Pharmacy, MedPlus, and diagnostic centers across India.',
+    },
+    {
+      q: 'Can I consult a doctor for reports done at other diagnostic laboratories?',
+      a: 'Absolutely. You can upload existing lab reports from Dr. Lal PathLabs, Agilus, Max Lab, Metropolis, SRL, or local hospital labs. Our specialists will review your PDF and answer all your medical queries.',
+    },
+    {
+      q: 'How do I join the video consultation after booking?',
+      a: 'Once your appointment is confirmed, you will immediately receive an SMS and WhatsApp message with your secure encrypted video room link. Simply click the link on your mobile or laptop at your appointment time—no app download required.',
+    },
+  ];
+
+  const testimonials = [
+    {
+      name: 'Gurpreet Singh',
+      city: 'Chandigarh',
+      doctor: 'Dr. Rajeshwar Varma (Pulmonology)',
+      rating: 5,
+      comment: 'Consulted Dr. Varma during the high AQI smog period for severe dry cough. He prescribed an effective nebulization plan and reviewed my blood eosinophils in detail. Exceptional doctor!',
+    },
+    {
+      name: 'Meenakshi Sharma',
+      city: 'Gurugram',
+      doctor: 'Dr. Sunita Aggarwal (Pathologist)',
+      rating: 5,
+      comment: 'The free 10-min report review was a lifesaver. Dr. Sunita clearly explained why my Vitamin D was low and guided me on the right supplement dosage without any panic.',
+    },
+    {
+      name: 'Rameshwar Dayal',
+      city: 'Jaipur',
+      doctor: 'Dr. Arvind Singhal (Cardiology)',
+      rating: 5,
+      comment: 'Very thorough explanation of my Lipid profile and cardiac risk markers. The digital prescription arrived on WhatsApp within 5 minutes of finishing the video call.',
+    },
   ];
 
   const filteredDoctors = DOCTOR_SPECIALISTS.filter((doc) => {
@@ -139,10 +189,10 @@ export const DoctorConsultation: React.FC<DoctorConsultationProps> = ({ selected
 
           <div className="max-w-3xl space-y-3">
             <h1 className="text-3xl sm:text-5xl font-black tracking-tight leading-tight">
-              Consult Top Specialists &amp; Discuss Your Test Reports
+              Consult Top Medical Specialists &amp; Discuss Your Test Reports
             </h1>
             <p className="text-sm sm:text-base text-slate-300">
-              Connect with experienced doctors from premier institutions like AIIMS New Delhi, PGIMER Chandigarh, and KGMU Lucknow. Book video teleconsultations or walk into our regional lab clinics.
+              Connect with leading doctors from premier institutions like <strong>AIIMS New Delhi, PGIMER Chandigarh, Medanta Gurugram, and KGMU Lucknow</strong>. Book instant HD video teleconsultations or in-clinic visits in {selectedCity}.
             </p>
           </div>
 
@@ -159,7 +209,7 @@ export const DoctorConsultation: React.FC<DoctorConsultationProps> = ({ selected
             <div className="bg-white/10 backdrop-blur-md p-3 rounded-2xl border border-white/10 flex items-center gap-2.5">
               <Award className="w-4 h-4 text-amber-400 shrink-0" />
               <div>
-                <strong className="block text-white">AIIMS / PGI Doctors</strong>
+                <strong className="block text-white">AIIMS / PGI Faculty</strong>
                 <span className="text-slate-400 text-[11px]">15+ Years Experience</span>
               </div>
             </div>
@@ -176,7 +226,7 @@ export const DoctorConsultation: React.FC<DoctorConsultationProps> = ({ selected
               <ShieldCheck className="w-4 h-4 text-brand-teal shrink-0" />
               <div>
                 <strong className="block text-white">100% Confidential</strong>
-                <span className="text-slate-400 text-[11px]">Encrypted Consultation</span>
+                <span className="text-slate-400 text-[11px]">Encrypted Medical Room</span>
               </div>
             </div>
           </div>
@@ -192,13 +242,13 @@ export const DoctorConsultation: React.FC<DoctorConsultationProps> = ({ selected
             </div>
             <div>
               <span className="text-[10px] font-extrabold uppercase tracking-widest bg-white text-amber-900 px-2.5 py-0.5 rounded-full">
-                Complementary Service
+                Complementary Patient Care
               </span>
               <h3 className="text-lg sm:text-xl font-black mt-1">
-                Got Test Results from AuraHealth? Get a Free 10-Min Doctor Review
+                Got Diagnostic Test Results? Get a Free 10-Min Doctor Review
               </h3>
               <p className="text-xs text-amber-100 mt-0.5 max-w-2xl">
-                Our in-house pathologist Dr. Sunita Aggarwal (AIIMS New Delhi) will explain your abnormal values, fasting glucose, vitamin deficiencies, and advise next steps.
+                Our in-house pathologist <strong>Dr. Sunita Aggarwal (AIIMS New Delhi)</strong> will explain your out-of-range parameters, fasting glucose, vitamin deficiencies, and advise clinical next steps.
               </p>
             </div>
           </div>
@@ -210,7 +260,7 @@ export const DoctorConsultation: React.FC<DoctorConsultationProps> = ({ selected
             }}
             className="shrink-0 px-6 py-3 bg-white text-brand-navy hover:bg-slate-100 text-xs font-black rounded-2xl shadow-md transition flex items-center gap-2"
           >
-            <span>Book Free Report Interpretation</span>
+            <span>Book Free Report Consultation</span>
             <ArrowRight className="w-4 h-4 text-brand-coral" />
           </button>
         </div>
@@ -219,7 +269,7 @@ export const DoctorConsultation: React.FC<DoctorConsultationProps> = ({ selected
       {/* Doctor Directory Section */}
       <section className="max-w-7xl mx-auto px-4 sm:px-8 pt-10 space-y-6">
         {/* Filter Controls */}
-        <div className="bg-white p-4 rounded-3xl border border-slate-200 shadow-sm space-y-4">
+        <div className="bg-white p-4 sm:p-6 rounded-3xl border border-slate-200 shadow-sm space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-12 gap-3 items-center">
             {/* Search Input */}
             <div className="md:col-span-6 relative">
@@ -274,13 +324,13 @@ export const DoctorConsultation: React.FC<DoctorConsultationProps> = ({ selected
               <button
                 key={s.id}
                 onClick={() => setSelectedSpecialty(s.id)}
-                className={`px-3.5 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition ${
+                className={`px-3.5 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition flex items-center gap-1.5 ${
                   selectedSpecialty === s.id
                     ? 'bg-brand-500 text-white shadow-sm'
                     : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
                 }`}
               >
-                {s.label}
+                <span>{s.label}</span>
               </button>
             ))}
           </div>
@@ -300,9 +350,12 @@ export const DoctorConsultation: React.FC<DoctorConsultationProps> = ({ selected
                     <img
                       src={doc.avatarUrl}
                       alt={doc.name}
-                      className="w-16 h-16 rounded-2xl object-cover border-2 border-brand-100 shadow-sm"
+                      className="w-16 h-16 rounded-2xl object-cover border-2 border-brand-100 shadow-sm group-hover:scale-105 transition"
                     />
-                    <span className="absolute -bottom-1 -right-1 w-4 h-4 rounded-full bg-emerald-500 border-2 border-white" title="Online Now" />
+                    <span
+                      className="absolute -bottom-1 -right-1 w-4 h-4 rounded-full bg-emerald-500 border-2 border-white animate-pulse"
+                      title="Available for Teleconsult Today"
+                    />
                   </div>
 
                   <div className="flex-1 min-w-0">
@@ -346,7 +399,7 @@ export const DoctorConsultation: React.FC<DoctorConsultationProps> = ({ selected
                 {/* Slots info */}
                 <div className="bg-emerald-50/60 p-2.5 rounded-xl border border-emerald-100 text-[11px] text-emerald-800 flex items-center justify-between">
                   <span className="flex items-center gap-1.5">
-                    <Clock className="w-3.5 h-3.5 text-emerald-600" /> Next Available Today:
+                    <Clock className="w-3.5 h-3.5 text-emerald-600" /> Next Available Slot:
                   </span>
                   <strong className="font-mono font-bold">{doc.availableSlotsToday[0]}</strong>
                 </div>
@@ -404,6 +457,142 @@ export const DoctorConsultation: React.FC<DoctorConsultationProps> = ({ selected
             </button>
           </div>
         )}
+      </section>
+
+      {/* 3-Step Process: How Online Doctor Consultation Works */}
+      <section className="max-w-7xl mx-auto px-4 sm:px-8 pt-16">
+        <div className="bg-white rounded-3xl p-8 border border-slate-200 shadow-sm space-y-8">
+          <div className="text-center max-w-2xl mx-auto space-y-2">
+            <span className="text-[10px] font-extrabold uppercase tracking-widest text-brand-teal bg-teal-50 px-3 py-1 rounded-full border border-teal-200">
+              Simple 3-Step Care
+            </span>
+            <h2 className="text-2xl sm:text-3xl font-black text-brand-navy">
+              How Video Doctor Consultations Work
+            </h2>
+            <p className="text-xs sm:text-sm text-slate-500">
+              Get medical advice, report interpretation, and official prescriptions from the comfort of your home.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="bg-slate-50 p-6 rounded-2xl border border-slate-100 space-y-3 relative">
+              <div className="w-10 h-10 rounded-xl bg-brand-navy text-white font-black flex items-center justify-center text-sm shadow">
+                1
+              </div>
+              <h3 className="text-sm font-bold text-slate-900">Select Specialist &amp; Time Slot</h3>
+              <p className="text-xs text-slate-600 leading-relaxed">
+                Choose a verified specialist from AIIMS, PGI, or Medanta and pick your preferred time slot today or tomorrow.
+              </p>
+            </div>
+
+            <div className="bg-slate-50 p-6 rounded-2xl border border-slate-100 space-y-3 relative">
+              <div className="w-10 h-10 rounded-xl bg-brand-teal text-white font-black flex items-center justify-center text-sm shadow">
+                2
+              </div>
+              <h3 className="text-sm font-bold text-slate-900">Receive WhatsApp &amp; SMS Link</h3>
+              <p className="text-xs text-slate-600 leading-relaxed">
+                Get an encrypted video room link directly on your WhatsApp and SMS. Tap the link to join directly without installing apps.
+              </p>
+            </div>
+
+            <div className="bg-slate-50 p-6 rounded-2xl border border-slate-100 space-y-3 relative">
+              <div className="w-10 h-10 rounded-xl bg-emerald-600 text-white font-black flex items-center justify-center text-sm shadow">
+                3
+              </div>
+              <h3 className="text-sm font-bold text-slate-900">Discuss Reports &amp; Get Digital Rx</h3>
+              <p className="text-xs text-slate-600 leading-relaxed">
+                Review your diagnostic tests with the doctor and receive a certified digital prescription valid across all pharmacies in India.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Verified Patient Testimonials */}
+      <section className="max-w-7xl mx-auto px-4 sm:px-8 pt-12">
+        <div className="space-y-6">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+            <div>
+              <span className="text-[10px] font-extrabold uppercase tracking-widest text-brand-teal">
+                Verified Patient Experiences
+              </span>
+              <h2 className="text-xl sm:text-2xl font-black text-brand-navy">
+                What North Indian Families Say About Our Doctors
+              </h2>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {testimonials.map((t, idx) => (
+              <div
+                key={idx}
+                className="bg-white p-5 rounded-3xl border border-slate-200 shadow-2xs space-y-3"
+              >
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-1 text-amber-400">
+                    {[...Array(t.rating)].map((_, i) => (
+                      <Star key={i} className="w-3.5 h-3.5 fill-amber-400" />
+                    ))}
+                  </div>
+                  <span className="text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full">
+                    ✓ Verified Patient
+                  </span>
+                </div>
+                <p className="text-xs text-slate-600 italic">"{t.comment}"</p>
+                <div className="pt-2 border-t border-slate-100 flex items-center justify-between text-xs">
+                  <div>
+                    <strong className="text-slate-900 block">{t.name}</strong>
+                    <span className="text-[10px] text-slate-400">{t.city}</span>
+                  </div>
+                  <span className="text-[10px] font-semibold text-brand-teal text-right max-w-[140px] truncate">
+                    {t.doctor}
+                  </span>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* FAQ Accordion Section */}
+      <section className="max-w-4xl mx-auto px-4 sm:px-8 pt-12 space-y-4">
+        <div className="text-center space-y-1">
+          <h2 className="text-xl sm:text-2xl font-black text-brand-navy">
+            Doctor Consultation FAQs
+          </h2>
+          <p className="text-xs text-slate-500">
+            Everything you need to know about our teleconsultation service and report interpretations.
+          </p>
+        </div>
+
+        <div className="space-y-3 pt-2">
+          {faqs.map((faq, idx) => {
+            const isOpen = expandedFaq === idx;
+            return (
+              <div
+                key={idx}
+                className="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-2xs transition"
+              >
+                <button
+                  onClick={() => setExpandedFaq(isOpen ? null : idx)}
+                  className="w-full p-4 text-left flex items-center justify-between gap-4 text-xs font-bold text-slate-800 hover:text-brand-navy"
+                >
+                  <span>{faq.q}</span>
+                  {isOpen ? (
+                    <ChevronUp className="w-4 h-4 text-brand-teal shrink-0" />
+                  ) : (
+                    <ChevronDown className="w-4 h-4 text-slate-400 shrink-0" />
+                  )}
+                </button>
+                {isOpen && (
+                  <div className="px-4 pb-4 text-xs text-slate-600 leading-relaxed border-t border-slate-50 pt-2 animate-fade-in">
+                    {faq.a}
+                  </div>
+                )}
+              </div>
+            );
+          })}
+        </div>
       </section>
 
       {/* Appointment Booking Modal */}

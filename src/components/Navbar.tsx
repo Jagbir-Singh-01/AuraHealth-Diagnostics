@@ -210,14 +210,17 @@ export const Navbar: React.FC<NavbarProps> = ({
 
           <button
             onClick={() => setActiveTab('doctors')}
-            className={`px-3 py-2 rounded-lg transition flex items-center gap-1 ${
+            className={`px-3 py-2 rounded-lg transition flex items-center gap-1.5 ${
               activeTab === 'doctors'
-                ? 'text-brand-teal bg-teal-50 font-bold ring-1 ring-brand-teal/30'
+                ? 'text-brand-teal bg-teal-50 font-black ring-1 ring-brand-teal/40 shadow-2xs'
                 : 'text-brand-teal hover:bg-teal-50/60 font-bold'
             }`}
           >
             <Stethoscope className="w-3.5 h-3.5 text-brand-teal" />
             <span>Doctor Consult</span>
+            <span className="text-[9px] bg-emerald-100 text-emerald-900 font-extrabold px-1.5 py-0.2 rounded-full border border-emerald-200">
+              Free Review
+            </span>
           </button>
 
           <button

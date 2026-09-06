@@ -165,6 +165,7 @@ export function App() {
               patientProfile={patientProfile}
               onOpenTestComparison={handleOpenTestComparison}
               searchInputRef={searchInputRef}
+              onOpenDoctorConsult={() => setActiveTab('doctors')}
             />
 
             <div className="max-w-7xl mx-auto px-4 sm:px-8">
@@ -185,6 +186,38 @@ export function App() {
               selectedPackage={selectedPackage}
               setSelectedPackage={setSelectedPackage}
             />
+
+            {/* Featured Doctor Consultation Callout */}
+            <div className="max-w-7xl mx-auto px-4 sm:px-8 py-4">
+              <div className="bg-gradient-to-r from-brand-navy via-brand-darkBlue to-brand-800 rounded-3xl p-6 sm:p-8 text-white shadow-xl flex flex-col lg:flex-row items-center justify-between gap-6 border border-teal-500/30">
+                <div className="space-y-2 max-w-2xl">
+                  <div className="flex items-center gap-2">
+                    <span className="text-[10px] font-extrabold uppercase tracking-widest text-brand-teal bg-teal-950 px-2.5 py-0.5 rounded border border-teal-800">
+                      North India Specialist Medical Board
+                    </span>
+                    <span className="text-[10px] font-bold text-amber-300 bg-amber-950/80 px-2 py-0.5 rounded border border-amber-800/80">
+                      ★ Free 10-Min Report Interpretation
+                    </span>
+                  </div>
+                  <h3 className="text-xl sm:text-2xl font-black tracking-tight text-white">
+                    Need Expert Medical Advice on Your Test Reports?
+                  </h3>
+                  <p className="text-xs sm:text-sm text-slate-300 leading-relaxed">
+                    Consult senior specialists from <strong>AIIMS New Delhi, PGIMER Chandigarh, and Medanta</strong> for Pulmonology, Diabetes, Heart health, and Pathological report interpretation via instant HD video.
+                  </p>
+                </div>
+
+                <div className="flex flex-col sm:flex-row items-center gap-3 shrink-0">
+                  <button
+                    onClick={() => setActiveTab('doctors')}
+                    className="w-full sm:w-auto px-6 py-3.5 bg-gradient-to-r from-brand-teal to-emerald-400 hover:from-teal-400 hover:to-emerald-500 text-brand-navy font-black text-xs rounded-2xl shadow-lg transition flex items-center justify-center gap-2"
+                  >
+                    <span>Explore All Doctors &amp; Book Video</span>
+                    <span>→</span>
+                  </button>
+                </div>
+              </div>
+            </div>
 
             <HealthTracker />
 
