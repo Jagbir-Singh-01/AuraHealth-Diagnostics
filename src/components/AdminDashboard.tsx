@@ -383,8 +383,12 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                 })}
 
                 {filteredDoctorAppts.length === 0 && (
-                  <div className="bg-white p-8 rounded-3xl text-center border border-slate-200 text-xs text-slate-400">
-                    No doctor consultation requests found matching criteria.
+                  <div className="bg-white p-8 rounded-3xl text-center border border-slate-200 text-xs text-slate-400 space-y-2">
+                    <Stethoscope className="w-6 h-6 mx-auto text-slate-300" />
+                    <p className="font-semibold text-slate-600">No Doctor Consultation Requests</p>
+                    <p className="text-[11px] text-slate-400">
+                      New patient consultation requests will appear here automatically in real-time.
+                    </p>
                   </div>
                 )}
               </div>
@@ -541,8 +545,18 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                   </div>
                 </div>
               ) : (
-                <div className="bg-white p-12 rounded-3xl text-center border border-slate-200 text-xs text-slate-400">
-                  Select a consultation from the queue to view details and coordinate with the doctor.
+                <div className="bg-white p-12 rounded-3xl text-center border border-slate-200 text-xs text-slate-500 space-y-3">
+                  <div className="w-12 h-12 rounded-2xl bg-teal-50 flex items-center justify-center mx-auto text-brand-teal">
+                    <Stethoscope className="w-6 h-6" />
+                  </div>
+                  <div>
+                    <h4 className="text-sm font-bold text-slate-800">No Doctor Teleconsultation Selected</h4>
+                    <p className="text-slate-400 text-xs mt-1">
+                      {doctorAppointments.length === 0
+                        ? 'No active doctor consultation requests. When patients book from the Doctor page, incoming requests appear here in real-time.'
+                        : 'Select a consultation request from the left queue to verify doctor calendar and generate the video room link.'}
+                    </p>
+                  </div>
                 </div>
               )}
             </div>

@@ -52,7 +52,7 @@ export const DoctorConsultation: React.FC<DoctorConsultationProps> = ({
     new Date().toISOString().split('T')[0]
   );
   const [patientName, setPatientName] = useState<string>('');
-  const [patientAge, setPatientAge] = useState<number>(45);
+  const [patientAge, setPatientAge] = useState<string>('');
   const [patientGender, setPatientGender] = useState<'Male' | 'Female' | 'Other'>('Male');
   const [patientPhone, setPatientPhone] = useState<string>('');
   const [symptoms, setSymptoms] = useState<string>('');
@@ -158,7 +158,7 @@ export const DoctorConsultation: React.FC<DoctorConsultationProps> = ({
         doctorSpecialty: selectedDoctor.specialty,
         doctorInstitution: selectedDoctor.institution,
         patientName,
-        patientAge,
+        patientAge: parseInt(patientAge) || 30,
         patientGender,
         patientPhone,
         patientCity: selectedCity,
@@ -820,11 +820,12 @@ export const DoctorConsultation: React.FC<DoctorConsultationProps> = ({
                     <div className="grid grid-cols-2 gap-2">
                       <input
                         type="number"
-                        placeholder="Age *"
+                        placeholder="Age (Yrs) *"
                         min={1}
                         max={120}
+                        required
                         value={patientAge}
-                        onChange={(e) => setPatientAge(parseInt(e.target.value) || 0)}
+                        onChange={(e) => setPatientAge(e.target.value)}
                         className="px-3.5 py-2.5 text-xs bg-white border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-500"
                       />
                       <select
