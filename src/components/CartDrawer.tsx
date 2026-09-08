@@ -176,8 +176,12 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
                   </span>
                 </div>
                 <div className="flex justify-between text-base font-black text-brand-navy pt-2 border-t border-slate-200">
-                  <span>To Pay:</span>
+                  <span>Pay Directly to Lab Phlebotomist:</span>
                   <span>₹{isFreeCollection ? subtotal : subtotal + 150}</span>
+                </div>
+                <div className="text-[10px] text-emerald-700 bg-emerald-50 px-2 py-1 rounded-lg font-bold flex items-center justify-between">
+                  <span>✓ ₹0 Advance Platform Fee</span>
+                  <span>Pay on Home Collection (UPI/Cash)</span>
                 </div>
               </div>
 
@@ -188,7 +192,7 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
                 }}
                 className="w-full py-3 bg-gradient-to-r from-brand-coral to-amber-500 hover:from-brand-coral hover:to-amber-600 text-white font-black text-xs rounded-2xl shadow-md transition flex items-center justify-center gap-2"
               >
-                <span>Select Date &amp; Fasting Slot</span>
+                <span>Select Fasting Slot &amp; Request Booking</span>
                 <ArrowRight className="w-4 h-4" />
               </button>
             </div>
