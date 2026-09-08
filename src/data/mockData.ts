@@ -1,4 +1,4 @@
-import { TestItem, HealthPackage, LabCenter, DiagnosticReport, NorthIndiaCity, Booking, Doctor, LabBrand, PatientProfile } from '../types';
+import { TestItem, HealthPackage, LabCenter, DiagnosticReport, NorthIndiaCity, Booking, Doctor, LabBrand, PatientProfile, DoctorAppointment, TeamNotification } from '../types';
 
 export const LAB_BRANDS: LabBrand[] = [
   {
@@ -1725,6 +1725,82 @@ export const SAMPLE_REPORTS: DiagnosticReport[] = [
 ];
 
 export const INITIAL_BOOKINGS: Booking[] = [];
+
+export const INITIAL_DOCTOR_APPOINTMENTS: DoctorAppointment[] = [
+  {
+    id: 'apt-demo-01',
+    appointmentNumber: 'DOC-APT-74192',
+    createdAt: 'Today, 10:15 AM',
+    doctorId: 'doc-01',
+    doctorName: 'Dr. Sunita Aggarwal',
+    doctorSpecialty: 'Pathologist & Lab Report Consultant',
+    doctorInstitution: 'AIIMS New Delhi Alumnus',
+    patientName: 'Harpreet Singh',
+    patientAge: 48,
+    patientGender: 'Male',
+    patientPhone: '9811234567',
+    patientCity: 'Chandigarh (Tricity)',
+    consultationMode: 'VIDEO',
+    appointmentDate: new Date().toISOString().split('T')[0],
+    appointmentTime: '05:00 PM',
+    symptoms: 'Need expert explanation for elevated HbA1c (7.8%) and borderline SGPT on yesterday lab report.',
+    status: 'PENDING_TEAM_CONFIRMATION',
+    feePaid: 0,
+    isSponsoredFreeReview: true,
+  },
+  {
+    id: 'apt-demo-02',
+    appointmentNumber: 'DOC-APT-89301',
+    createdAt: 'Today, 11:30 AM',
+    doctorId: 'doc-02',
+    doctorName: 'Dr. Rajeshwar Varma',
+    doctorSpecialty: 'Pulmonologist (Chest & Smog)',
+    doctorInstitution: 'PGIMER Chandigarh / Max Super Speciality',
+    patientName: 'Pooja Verma',
+    patientAge: 36,
+    patientGender: 'Female',
+    patientPhone: '9876543210',
+    patientCity: 'Gurugram (Gurgaon)',
+    consultationMode: 'VIDEO',
+    appointmentDate: new Date().toISOString().split('T')[0],
+    appointmentTime: '06:30 PM',
+    symptoms: 'Severe dry cough and morning throat burning due to high AQI smog. Need nebulization prescription.',
+    status: 'PENDING_TEAM_CONFIRMATION',
+    feePaid: 499,
+    isSponsoredFreeReview: false,
+  }
+];
+
+export const INITIAL_NOTIFICATIONS: TeamNotification[] = [
+  {
+    id: 'notif-demo-01',
+    type: 'DOCTOR_CONSULTATION',
+    bookingNumber: 'DOC-APT-74192',
+    patientName: 'Harpreet Singh',
+    patientPhone: '9811234567',
+    selectedLab: 'Dr. Sunita Aggarwal (AIIMS Pathologist)',
+    testNames: ['Free 10-Min Report Review - HbA1c & LFT'],
+    totalAmount: 0,
+    slotTime: '05:00 PM Today',
+    city: 'Chandigarh (Tricity)',
+    timestamp: '10:15 AM',
+    isRead: false
+  },
+  {
+    id: 'notif-demo-02',
+    type: 'DOCTOR_CONSULTATION',
+    bookingNumber: 'DOC-APT-89301',
+    patientName: 'Pooja Verma',
+    patientPhone: '9876543210',
+    selectedLab: 'Dr. Rajeshwar Varma (Pulmonology)',
+    testNames: ['Winter Smog Cough & Chest Review'],
+    totalAmount: 499,
+    slotTime: '06:30 PM Today',
+    city: 'Gurugram',
+    timestamp: '11:30 AM',
+    isRead: false
+  }
+];
 
 export const PROMO_COUPONS = [
   { code: 'NORTH20', discountPercent: 20, minOrder: 999, description: 'Flat 20% off on all North India Health Packages' },

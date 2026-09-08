@@ -146,6 +146,7 @@ export interface CartItem {
 
 export interface TeamNotification {
   id: string;
+  type?: 'LAB_TEST_BOOKING' | 'DOCTOR_CONSULTATION';
   bookingNumber: string;
   patientName: string;
   patientPhone: string;
@@ -291,18 +292,24 @@ export interface Doctor {
 export interface DoctorAppointment {
   id: string;
   appointmentNumber: string;
+  createdAt?: string;
   doctorId: string;
   doctorName: string;
   doctorSpecialty: string;
+  doctorInstitution?: string;
   patientName: string;
   patientAge: number;
   patientGender: 'Male' | 'Female' | 'Other';
   patientPhone: string;
+  patientCity?: string;
   consultationMode: 'VIDEO' | 'IN_CLINIC';
   appointmentDate: string;
   appointmentTime: string;
   symptoms: string;
-  status: 'CONFIRMED' | 'COMPLETED' | 'CANCELLED';
+  status: 'PENDING_TEAM_CONFIRMATION' | 'CONFIRMED_BY_TEAM' | 'COMPLETED' | 'CANCELLED' | 'CONFIRMED';
   feePaid: number;
+  isSponsoredFreeReview?: boolean;
   meetLink?: string;
+  teamNotes?: string;
+  confirmedByOperatorName?: string;
 }

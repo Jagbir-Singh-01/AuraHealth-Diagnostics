@@ -24,16 +24,21 @@ import {
   Lock,
   Check,
   Zap,
+  BellRing,
 } from 'lucide-react';
 import { DOCTOR_SPECIALISTS, NORTH_INDIA_CITIES } from '../data/mockData';
-import { Doctor, DoctorAppointment } from '../types';
+import { Doctor, DoctorAppointment, TeamNotification } from '../types';
 import confetti from 'canvas-confetti';
 
 interface DoctorConsultationProps {
   selectedCity: string;
+  onRequestDoctorAppointment?: (appt: DoctorAppointment, notif: TeamNotification) => void;
 }
 
-export const DoctorConsultation: React.FC<DoctorConsultationProps> = ({ selectedCity }) => {
+export const DoctorConsultation: React.FC<DoctorConsultationProps> = ({
+  selectedCity,
+  onRequestDoctorAppointment,
+}) => {
   const [selectedSpecialty, setSelectedSpecialty] = useState<string>('ALL');
   const [consultationMode, setConsultationMode] = useState<'ALL' | 'VIDEO' | 'IN_CLINIC'>('ALL');
   const [searchQuery, setSearchQuery] = useState<string>('');
@@ -70,16 +75,20 @@ export const DoctorConsultation: React.FC<DoctorConsultationProps> = ({ selected
       a: 'Whenever you book any blood test or health checkup on AuraHealth Diagnostics, you automatically get an optional complimentary 10-minute video session with our Senior Pathologist Dr. Sunita Aggarwal (AIIMS New Delhi) to review out-of-range parameters, fasting sugars, liver/kidney biomarkers, and next steps.',
     },
     {
+      q: 'How does our Operations Team confirm and schedule your consultation?',
+      a: 'When you submit a consultation request, our Patient Care & Operations Team instantly receives a high-priority alert. Our team contacts the doctor’s schedule coordinator, reserves your preferred time slot, and sends your secure HD Video Meeting Link directly to your WhatsApp and SMS within 10-15 minutes.',
+    },
+    {
       q: 'Are digital prescriptions issued during video consultations legally valid?',
       a: 'Yes, 100%. All doctors on our platform are NMC (National Medical Commission) registered. Digital e-prescriptions generated bear the physician’s registration number and digital signature, making them valid at all retail pharmacies, Apollo Pharmacy, MedPlus, and diagnostic centers across India.',
     },
     {
       q: 'Can I consult a doctor for reports done at other diagnostic laboratories?',
-      a: 'Absolutely. You can upload existing lab reports from Dr. Lal PathLabs, Agilus, Max Lab, Metropolis, SRL, or local hospital labs. Our specialists will review your PDF and answer all your medical queries.',
+      a: 'Absolutely. You can discuss existing lab reports from Dr. Lal PathLabs, Agilus, Max Lab, Metropolis, SRL, or local hospital labs. Our specialists will review your PDF and answer all your medical queries.',
     },
     {
       q: 'How do I join the video consultation after booking?',
-      a: 'Once your appointment is confirmed, you will immediately receive an SMS and WhatsApp message with your secure encrypted video room link. Simply click the link on your mobile or laptop at your appointment time—no app download required.',
+      a: 'Once your appointment is confirmed by our operations team, you will immediately receive an SMS and WhatsApp message with your secure encrypted video room link. Simply click the link on your mobile or laptop at your appointment time—no app download required.',
     },
   ];
 
@@ -89,7 +98,7 @@ export const DoctorConsultation: React.FC<DoctorConsultationProps> = ({ selected
       city: 'Chandigarh',
       doctor: 'Dr. Rajeshwar Varma (Pulmonology)',
       rating: 5,
-      comment: 'Consulted Dr. Varma during the high AQI smog period for severe dry cough. He prescribed an effective nebulization plan and reviewed my blood eosinophils in detail. Exceptional doctor!',
+      comment: 'Consulted Dr. Varma during the high AQI smog period for severe dry cough. Our operations team connected us within 10 minutes and he prescribed an effective nebulization plan. Exceptional care!',
     },
     {
       name: 'Meenakshi Sharma',
@@ -138,27 +147,56 @@ export const DoctorConsultation: React.FC<DoctorConsultationProps> = ({ selected
     setTimeout(() => {
       setIsSubmitting(false);
       const apptNo = `DOC-APT-${Math.floor(10000 + Math.random() * 90000)}`;
+      const isFree = selectedDoctor.consultationFee === 0 || selectedDoctor.isFreeReportReviewAvailable;
+
       const appt: DoctorAppointment = {
         id: `apt-${Date.now()}`,
         appointmentNumber: apptNo,
+        createdAt: 'Just now',
         doctorId: selectedDoctor.id,
         doctorName: selectedDoctor.name,
         doctorSpecialty: selectedDoctor.specialty,
+        doctorInstitution: selectedDoctor.institution,
         patientName,
         patientAge,
         patientGender,
         patientPhone,
+        patientCity: selectedCity,
         consultationMode: bookingMode,
         appointmentDate: selectedDate,
         appointmentTime: selectedSlot,
-        symptoms: symptoms || 'Routine medical review',
-        status: 'CONFIRMED',
+        symptoms: symptoms || 'Routine medical review & test report discussion',
+        status: 'PENDING_TEAM_CONFIRMATION',
         feePaid: selectedDoctor.consultationFee,
+        isSponsoredFreeReview: isFree,
         meetLink:
           bookingMode === 'VIDEO'
             ? `https://meet.aurahealth.in/room/${apptNo.toLowerCase()}`
             : undefined,
       };
+
+      const notif: TeamNotification = {
+        id: `notif-${Date.now()}`,
+        type: 'DOCTOR_CONSULTATION',
+        bookingNumber: apptNo,
+        patientName,
+        patientPhone,
+        selectedLab: `${selectedDoctor.name} (${selectedDoctor.specialty.split(' ')[0]})`,
+        testNames: [
+          isFree
+            ? 'Free 10-Min Report Review'
+            : `${selectedDoctor.specialty} Consultation (${bookingMode})`,
+        ],
+        totalAmount: selectedDoctor.consultationFee,
+        slotTime: `${selectedSlot} (${selectedDate})`,
+        city: selectedCity,
+        timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+        isRead: false,
+      };
+
+      if (onRequestDoctorAppointment) {
+        onRequestDoctorAppointment(appt, notif);
+      }
 
       setConfirmedAppointment(appt);
 
@@ -169,7 +207,7 @@ export const DoctorConsultation: React.FC<DoctorConsultationProps> = ({ selected
           origin: { y: 0.6 },
         });
       } catch (err) {}
-    }, 1000);
+    }, 800);
   };
 
   return (
@@ -184,6 +222,9 @@ export const DoctorConsultation: React.FC<DoctorConsultationProps> = ({ selected
             </span>
             <span className="inline-flex items-center gap-1 text-xs font-semibold bg-emerald-950/80 text-emerald-300 px-3 py-1 rounded-full border border-emerald-500/30">
               <Sparkles className="w-3.5 h-3.5 text-emerald-400" /> Free 10-Min Report Interpretation
+            </span>
+            <span className="inline-flex items-center gap-1 text-xs font-semibold bg-amber-950/80 text-amber-300 px-3 py-1 rounded-full border border-amber-500/30">
+              <Zap className="w-3.5 h-3.5 text-amber-400" /> Coordinated by Operations Portal
             </span>
           </div>
 
@@ -467,10 +508,10 @@ export const DoctorConsultation: React.FC<DoctorConsultationProps> = ({ selected
               Simple 3-Step Care
             </span>
             <h2 className="text-2xl sm:text-3xl font-black text-brand-navy">
-              How Video Doctor Consultations Work
+              How Operations-Managed Doctor Consultations Work
             </h2>
             <p className="text-xs sm:text-sm text-slate-500">
-              Get medical advice, report interpretation, and official prescriptions from the comfort of your home.
+              Submit your request, and our operations team verifies the doctor's calendar and sends your encrypted meeting link.
             </p>
           </div>
 
@@ -479,9 +520,9 @@ export const DoctorConsultation: React.FC<DoctorConsultationProps> = ({ selected
               <div className="w-10 h-10 rounded-xl bg-brand-navy text-white font-black flex items-center justify-center text-sm shadow">
                 1
               </div>
-              <h3 className="text-sm font-bold text-slate-900">Select Specialist &amp; Time Slot</h3>
+              <h3 className="text-sm font-bold text-slate-900">1. Submit Consultation Request</h3>
               <p className="text-xs text-slate-600 leading-relaxed">
-                Choose a verified specialist from AIIMS, PGI, or Medanta and pick your preferred time slot today or tomorrow.
+                Choose your specialist from AIIMS, PGI, or Medanta, pick your preferred slot, and describe your symptoms or test report questions.
               </p>
             </div>
 
@@ -489,9 +530,9 @@ export const DoctorConsultation: React.FC<DoctorConsultationProps> = ({ selected
               <div className="w-10 h-10 rounded-xl bg-brand-teal text-white font-black flex items-center justify-center text-sm shadow">
                 2
               </div>
-              <h3 className="text-sm font-bold text-slate-900">Receive WhatsApp &amp; SMS Link</h3>
+              <h3 className="text-sm font-bold text-slate-900">2. Team Confirms &amp; Sends Room Link</h3>
               <p className="text-xs text-slate-600 leading-relaxed">
-                Get an encrypted video room link directly on your WhatsApp and SMS. Tap the link to join directly without installing apps.
+                Our operations team confirms the slot with the doctor and immediately dispatches your secure HD Video Meeting link via WhatsApp and SMS.
               </p>
             </div>
 
@@ -499,9 +540,9 @@ export const DoctorConsultation: React.FC<DoctorConsultationProps> = ({ selected
               <div className="w-10 h-10 rounded-xl bg-emerald-600 text-white font-black flex items-center justify-center text-sm shadow">
                 3
               </div>
-              <h3 className="text-sm font-bold text-slate-900">Discuss Reports &amp; Get Digital Rx</h3>
+              <h3 className="text-sm font-bold text-slate-900">3. Video Consult &amp; Digital Rx</h3>
               <p className="text-xs text-slate-600 leading-relaxed">
-                Review your diagnostic tests with the doctor and receive a certified digital prescription valid across all pharmacies in India.
+                Review your diagnostic reports 1-on-1 with the doctor and receive a certified NMC digital prescription valid across India.
               </p>
             </div>
           </div>
@@ -625,21 +666,34 @@ export const DoctorConsultation: React.FC<DoctorConsultationProps> = ({ selected
             {/* Modal Body */}
             <div className="p-6 overflow-y-auto space-y-5">
               {confirmedAppointment ? (
-                /* Success State */
+                /* Success State (Operations Team Managed) */
                 <div className="text-center py-4 space-y-4">
                   <div className="w-16 h-16 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center mx-auto animate-bounce">
                     <CheckCircle2 className="w-10 h-10" />
                   </div>
 
                   <div>
-                    <h3 className="text-xl font-black text-brand-navy">
-                      Consultation Confirmed!
+                    <span className="text-[10px] font-extrabold uppercase tracking-widest text-emerald-700 bg-emerald-50 px-2.5 py-0.5 rounded-full border border-emerald-200">
+                      Dispatched to Operations Team
+                    </span>
+                    <h3 className="text-xl font-black text-brand-navy mt-1">
+                      Consultation Request Received!
                     </h3>
                     <p className="text-xs text-slate-500 mt-0.5">
-                      Appointment ID:{' '}
+                      Request ID:{' '}
                       <span className="font-mono font-bold text-brand-600">
                         {confirmedAppointment.appointmentNumber}
                       </span>
+                    </p>
+                  </div>
+
+                  <div className="bg-amber-50 p-4 rounded-2xl border border-amber-200 text-xs text-amber-900 text-left space-y-2">
+                    <div className="flex items-center gap-2 font-bold text-amber-950">
+                      <BellRing className="w-4 h-4 text-amber-600" />
+                      <span>Next Steps by Our Patient Care Team:</span>
+                    </div>
+                    <p className="text-[11px] text-amber-800 leading-relaxed">
+                      Our Operations Team has received your request for <strong>{confirmedAppointment.doctorName}</strong> ({confirmedAppointment.appointmentTime} on {confirmedAppointment.appointmentDate}). Our team is verifying the slot and will send the official <strong>Encrypted Video Meeting Room Link on WhatsApp &amp; SMS</strong> to <strong>+91 {confirmedAppointment.patientPhone}</strong> within 10-15 minutes.
                     </p>
                   </div>
 
@@ -649,7 +703,7 @@ export const DoctorConsultation: React.FC<DoctorConsultationProps> = ({ selected
                       <strong className="text-slate-800">{confirmedAppointment.doctorName}</strong>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-slate-400">Date &amp; Time:</span>
+                      <span className="text-slate-400">Date &amp; Slot:</span>
                       <strong className="text-slate-800">
                         {confirmedAppointment.appointmentDate} at {confirmedAppointment.appointmentTime}
                       </strong>
@@ -662,26 +716,15 @@ export const DoctorConsultation: React.FC<DoctorConsultationProps> = ({ selected
                           : '🏥 In-Clinic Lab Visit'}
                       </strong>
                     </div>
-                    {confirmedAppointment.meetLink && (
-                      <div className="pt-2 border-t border-slate-200">
-                        <span className="text-[10px] text-slate-400 block mb-1">
-                          Video Room Link (Also sent on SMS/WhatsApp):
-                        </span>
-                        <a
-                          href={confirmedAppointment.meetLink}
-                          target="_blank"
-                          rel="noreferrer"
-                          className="font-mono text-brand-600 font-bold hover:underline block truncate"
-                        >
-                          {confirmedAppointment.meetLink}
-                        </a>
-                      </div>
-                    )}
+                    <div className="flex justify-between">
+                      <span className="text-slate-400">Platform Advance:</span>
+                      <strong className="text-emerald-600">₹0 (No Advance Payment)</strong>
+                    </div>
                   </div>
 
                   <button
                     onClick={() => setSelectedDoctor(null)}
-                    className="w-full py-3 bg-brand-navy text-white text-xs font-bold rounded-xl hover:bg-brand-darkBlue transition"
+                    className="w-full py-3 bg-brand-navy text-white text-xs font-bold rounded-xl hover:bg-brand-darkBlue transition shadow"
                   >
                     Done
                   </button>
@@ -803,7 +846,7 @@ export const DoctorConsultation: React.FC<DoctorConsultationProps> = ({ selected
                         type="tel"
                         maxLength={10}
                         required
-                        placeholder="Mobile Number (For WhatsApp link) *"
+                        placeholder="Mobile Number (For WhatsApp room link) *"
                         value={patientPhone}
                         onChange={(e) => setPatientPhone(e.target.value.replace(/\D/g, ''))}
                         className="w-full pl-12 pr-4 py-2.5 text-xs bg-white border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-500 font-mono"
@@ -811,18 +854,26 @@ export const DoctorConsultation: React.FC<DoctorConsultationProps> = ({ selected
                     </div>
                   </div>
 
-                  {/* Symptoms */}
+                  {/* Symptoms & Discussion Reason */}
                   <div>
                     <label className="text-xs font-bold text-slate-700 block mb-1">
-                      Reason for Consultation / Symptoms
+                      Reason for Consultation / Symptoms / Report Questions
                     </label>
                     <textarea
                       rows={2}
                       value={symptoms}
                       onChange={(e) => setSymptoms(e.target.value)}
-                      placeholder="e.g. Discussing elevated sugar and winter cough..."
+                      placeholder="e.g. Need explanation for high HbA1c and persistent dry smog cough..."
                       className="w-full p-2.5 text-xs bg-white border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-500"
                     />
+                  </div>
+
+                  {/* Operations Team Notice */}
+                  <div className="bg-teal-50 p-3 rounded-xl border border-teal-200 text-[11px] text-teal-900 flex items-center gap-2">
+                    <Zap className="w-4 h-4 text-teal-600 shrink-0" />
+                    <span>
+                      Our Operations Team will confirm the doctor's calendar and dispatch the verified Video Meeting link to your WhatsApp.
+                    </span>
                   </div>
 
                   {/* Fee Summary & Submit */}
@@ -841,7 +892,7 @@ export const DoctorConsultation: React.FC<DoctorConsultationProps> = ({ selected
                       disabled={isSubmitting}
                       className="px-6 py-2.5 bg-gradient-to-r from-brand-coral to-amber-500 hover:from-brand-coral hover:to-amber-600 text-white text-xs font-bold rounded-xl shadow-md transition disabled:opacity-50"
                     >
-                      {isSubmitting ? 'Confirming...' : 'Confirm Appointment'}
+                      {isSubmitting ? 'Dispatching to Team...' : 'Request Doctor Appointment'}
                     </button>
                   </div>
                 </form>

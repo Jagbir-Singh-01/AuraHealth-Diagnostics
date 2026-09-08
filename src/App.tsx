@@ -18,8 +18,8 @@ import { PatientRegistrationModal } from './components/PatientRegistrationModal'
 import { LabComparisonModal } from './components/LabComparisonModal';
 import { CartDrawer } from './components/CartDrawer';
 import { HomeCollectionBookingModal } from './components/HomeCollectionBookingModal';
-import { CartItem, HealthPackage, TestItem, Booking, PatientProfile, LabTestOffering, TeamNotification } from './types';
-import { INITIAL_BOOKINGS, HEALTH_PACKAGES, INITIAL_EMPTY_PATIENT_PROFILE, POPULAR_TESTS } from './data/mockData';
+import { CartItem, HealthPackage, TestItem, Booking, PatientProfile, LabTestOffering, TeamNotification, DoctorAppointment } from './types';
+import { INITIAL_BOOKINGS, HEALTH_PACKAGES, INITIAL_EMPTY_PATIENT_PROFILE, POPULAR_TESTS, INITIAL_DOCTOR_APPOINTMENTS, INITIAL_NOTIFICATIONS } from './data/mockData';
 import { Check, Bell } from 'lucide-react';
 
 export function App() {
@@ -27,7 +27,8 @@ export function App() {
   const [activeTab, setActiveTab] = useState<string>('home');
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
   const [bookings, setBookings] = useState<Booking[]>(INITIAL_BOOKINGS);
-  const [notifications, setNotifications] = useState<TeamNotification[]>([]);
+  const [doctorAppointments, setDoctorAppointments] = useState<DoctorAppointment[]>(INITIAL_DOCTOR_APPOINTMENTS);
+  const [notifications, setNotifications] = useState<TeamNotification[]>(INITIAL_NOTIFICATIONS);
   const [patientProfile, setPatientProfile] = useState<PatientProfile>(INITIAL_EMPTY_PATIENT_PROFILE);
 
   // Modals state
@@ -106,6 +107,15 @@ export function App() {
     setNotifications((prev) => [newNotification, ...prev]);
     setCartItems([]);
     showToast(`🔔 Direct test registration sent to operations team for ${newBooking.selectedLabName}!`);
+  };
+
+  const handleDoctorAppointmentRequest = (
+    newAppointment: DoctorAppointment,
+    newNotification: TeamNotification
+  ) => {
+    setDoctorAppointments((prev) => [newAppointment, ...prev]);
+    setNotifications((prev) => [newNotification, ...prev]);
+    showToast(`🩺 Consultation request sent to Operations Team for ${newAppointment.doctorName}!`);
   };
 
   const handleSearchFocus = () => {
@@ -252,7 +262,12 @@ export function App() {
           </div>
         )}
 
-        {activeTab === 'doctors' && <DoctorConsultation selectedCity={selectedCity} />}
+        {activeTab === 'doctors' && (
+          <DoctorConsultation
+            selectedCity={selectedCity}
+            onRequestDoctorAppointment={handleDoctorAppointmentRequest}
+          />
+        )}
 
         {activeTab === 'smog' && (
           <div className="max-w-7xl mx-auto px-4 sm:px-8 py-8 space-y-6">
@@ -279,6 +294,8 @@ export function App() {
           <AdminDashboard
             bookings={bookings}
             setBookings={setBookings}
+            doctorAppointments={doctorAppointments}
+            setDoctorAppointments={setDoctorAppointments}
             notifications={notifications}
             setNotifications={setNotifications}
             onNotify={showToast}
