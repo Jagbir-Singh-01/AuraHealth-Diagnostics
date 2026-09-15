@@ -27,6 +27,7 @@ import {
   Link2,
 } from 'lucide-react';
 import { Booking, TeamNotification, DoctorAppointment } from '../types';
+import { updateBookingInDb, updateDoctorAppointmentInDb, markNotificationReadInDb, DbServiceStatus } from '../services/dbService';
 
 interface AdminDashboardProps {
   bookings: Booking[];
@@ -35,6 +36,7 @@ interface AdminDashboardProps {
   setDoctorAppointments: React.Dispatch<React.SetStateAction<DoctorAppointment[]>>;
   notifications: TeamNotification[];
   setNotifications: React.Dispatch<React.SetStateAction<TeamNotification[]>>;
+  dbStatus?: DbServiceStatus;
   onNotify: (msg: string) => void;
 }
 
@@ -45,6 +47,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
   setDoctorAppointments,
   notifications,
   setNotifications,
+  dbStatus,
   onNotify,
 }) => {
   const [activeTab, setActiveTab] = useState<'LAB_REQUESTS' | 'DOCTOR_REQUESTS' | 'NOTIFICATIONS'>('LAB_REQUESTS');
@@ -92,6 +95,18 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
     if (selectedBooking?.id === bookingId) {
       setSelectedBooking(updated.find((b) => b.id === bookingId) || null);
     }
+    updateBookingInDb(booking.bookingNumber, {
+      status: 'BOOKED_BY_TEAM',
+      officialLabRefNumber: generatedToken,
+      teamNotes: `Registered in ${booking.selectedLabName} LIMS on ${new Date().toLocaleTimeString()} by Operations Team.`,
+      phlebotomist: {
+        name: 'Vikas Sharma',
+        phone: '+91 98112 34567',
+        badgeNumber: `${labPrefix}-PHLEB-108`,
+        vaccinationStatus: 'Fully Vaccinated & Verified',
+        liveLocationStatus: 'Assigned for morning collection slot',
+      },
+    });
     onNotify(`✓ Registered "${booking.bookingNumber}" with ${booking.selectedLabName}! Lab Ref: ${generatedToken}`);
   };
 
@@ -102,6 +117,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
   };
 
   const handleMarkPaymentCollected = (bookingId: string) => {
+    const booking = bookings.find((b) => b.id === bookingId);
     const updated = bookings.map((b) => {
       if (b.id === bookingId) {
         return {
@@ -116,6 +132,13 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
     setBookings(updated);
     if (selectedBooking?.id === bookingId) {
       setSelectedBooking(updated.find((b) => b.id === bookingId) || null);
+    }
+    if (booking) {
+      updateBookingInDb(booking.bookingNumber, {
+        paymentStatus: 'PAID_TO_LAB',
+        status: 'SAMPLE_COLLECTED',
+        teamNotes: 'Sample collected & direct payment received by visiting lab phlebotomist.',
+      });
     }
     onNotify(`Payment verified for order ${bookingId}. Status updated to Sample Collected.`);
   };
@@ -144,6 +167,12 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
     if (selectedDoctorAppt?.id === apptId) {
       setSelectedDoctorAppt(updated.find((a) => a.id === apptId) || null);
     }
+    updateDoctorAppointmentInDb(appt.appointmentNumber, {
+      status: 'CONFIRMED_BY_TEAM',
+      meetLink: generatedMeetLink,
+      teamNotes: `Doctor calendar confirmed by Operations Coordinator on ${new Date().toLocaleTimeString()}. Video room generated.`,
+      confirmedByOperatorName: 'Patient Care Desk',
+    });
     onNotify(`✓ Confirmed appointment "${appt.appointmentNumber}" for ${appt.doctorName}! Video link generated.`);
   };
 
@@ -154,6 +183,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
   };
 
   const handleMarkDoctorConsultComplete = (apptId: string) => {
+    const appt = doctorAppointments.find((a) => a.id === apptId);
     const updated = doctorAppointments.map((a) => {
       if (a.id === apptId) {
         return {
@@ -168,6 +198,12 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
     if (selectedDoctorAppt?.id === apptId) {
       setSelectedDoctorAppt(updated.find((a) => a.id === apptId) || null);
     }
+    if (appt) {
+      updateDoctorAppointmentInDb(appt.appointmentNumber, {
+        status: 'COMPLETED',
+        teamNotes: 'Teleconsultation completed successfully. Digital e-prescription sent to patient WhatsApp.',
+      });
+    }
     onNotify(`Doctor Consultation ${apptId} marked as completed.`);
   };
 
@@ -175,6 +211,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
     setNotifications((prev) =>
       prev.map((n) => (n.id === notifId ? { ...n, isRead: true } : n))
     );
+    markNotificationReadInDb(notifId);
   };
 
   const filteredBookings = bookings.filter((b) => {
@@ -207,12 +244,21 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
       <section className="bg-brand-navy text-white py-8 px-4 sm:px-8 border-b border-slate-800">
         <div className="max-w-7xl mx-auto flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div className="space-y-1">
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 flex-wrap">
               <span className="text-[10px] font-extrabold uppercase tracking-widest text-brand-teal bg-teal-950 px-2.5 py-0.5 rounded border border-teal-800">
                 Operations &amp; Fulfillment Center
               </span>
               <span className="text-[10px] font-bold text-emerald-400 bg-emerald-950/80 px-2 py-0.5 rounded border border-emerald-800/80">
                 ● Live Operations Dispatch Queue
+              </span>
+              <span
+                className={`text-[10px] font-extrabold px-2.5 py-0.5 rounded border flex items-center gap-1 ${
+                  dbStatus?.isPostgresConnected
+                    ? 'bg-emerald-950 text-emerald-300 border-emerald-700'
+                    : 'bg-amber-950 text-amber-300 border-amber-700'
+                }`}
+              >
+                <span>{dbStatus?.isPostgresConnected ? '🐘 PostgreSQL Connected' : '🐘 PostgreSQL Ready (Local Driver)'}</span>
               </span>
             </div>
             <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-white mt-1">

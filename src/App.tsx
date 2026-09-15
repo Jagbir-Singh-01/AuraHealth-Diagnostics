@@ -20,6 +20,15 @@ import { CartDrawer } from './components/CartDrawer';
 import { HomeCollectionBookingModal } from './components/HomeCollectionBookingModal';
 import { CartItem, HealthPackage, TestItem, Booking, PatientProfile, LabTestOffering, TeamNotification, DoctorAppointment } from './types';
 import { INITIAL_BOOKINGS, HEALTH_PACKAGES, INITIAL_EMPTY_PATIENT_PROFILE, POPULAR_TESTS, INITIAL_DOCTOR_APPOINTMENTS, INITIAL_NOTIFICATIONS } from './data/mockData';
+import {
+  fetchBookingsFromDb,
+  fetchDoctorAppointmentsFromDb,
+  fetchNotificationsFromDb,
+  saveBookingToDb,
+  saveDoctorAppointmentToDb,
+  subscribeToRealtimeUpdates,
+  getDbStatus,
+} from './services/dbService';
 import { Check, Bell } from 'lucide-react';
 
 export function App() {
@@ -30,6 +39,46 @@ export function App() {
   const [doctorAppointments, setDoctorAppointments] = useState<DoctorAppointment[]>(INITIAL_DOCTOR_APPOINTMENTS);
   const [notifications, setNotifications] = useState<TeamNotification[]>(INITIAL_NOTIFICATIONS);
   const [patientProfile, setPatientProfile] = useState<PatientProfile>(INITIAL_EMPTY_PATIENT_PROFILE);
+  const [dbStatus, setDbStatus] = useState(getDbStatus());
+
+  // Load initial data from PostgreSQL (or local fallback) & subscribe to Realtime updates
+  useEffect(() => {
+    let isMounted = true;
+    const loadDbData = async () => {
+      try {
+        const [loadedBookings, loadedAppts, loadedNotifs] = await Promise.all([
+          fetchBookingsFromDb(),
+          fetchDoctorAppointmentsFromDb(),
+          fetchNotificationsFromDb(),
+        ]);
+        if (isMounted) {
+          if (loadedBookings.length > 0) setBookings(loadedBookings);
+          if (loadedAppts.length > 0) setDoctorAppointments(loadedAppts);
+          if (loadedNotifs.length > 0) setNotifications(loadedNotifs);
+          setDbStatus(getDbStatus());
+        }
+      } catch (err) {
+        console.warn('Could not load data from database:', err);
+      }
+    };
+
+    loadDbData();
+
+    // Subscribe to live PostgreSQL Realtime updates
+    const unsubscribe = subscribeToRealtimeUpdates(
+      (newBooking) => setBookings((prev) => [newBooking, ...prev]),
+      (newAppt) => setDoctorAppointments((prev) => [newAppt, ...prev]),
+      (newNotif) => {
+        setNotifications((prev) => [newNotif, ...prev]);
+        showToast(`🔔 Live Alert: ${newNotif.patientName} (${newNotif.selectedLab})`);
+      }
+    );
+
+    return () => {
+      isMounted = false;
+      unsubscribe();
+    };
+  }, []);
 
   // Modals state
   const [isCityModalOpen, setIsCityModalOpen] = useState(false);
@@ -106,6 +155,7 @@ export function App() {
     setBookings((prev) => [newBooking, ...prev]);
     setNotifications((prev) => [newNotification, ...prev]);
     setCartItems([]);
+    saveBookingToDb(newBooking, newNotification);
     showToast(`🔔 Direct test registration sent to operations team for ${newBooking.selectedLabName}!`);
   };
 
@@ -115,6 +165,7 @@ export function App() {
   ) => {
     setDoctorAppointments((prev) => [newAppointment, ...prev]);
     setNotifications((prev) => [newNotification, ...prev]);
+    saveDoctorAppointmentToDb(newAppointment, newNotification);
     showToast(`🩺 Consultation request sent to Operations Team for ${newAppointment.doctorName}!`);
   };
 
@@ -298,6 +349,7 @@ export function App() {
             setDoctorAppointments={setDoctorAppointments}
             notifications={notifications}
             setNotifications={setNotifications}
+            dbStatus={dbStatus}
             onNotify={showToast}
           />
         )}
