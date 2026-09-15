@@ -25,9 +25,16 @@ import {
   MessageSquare,
   Award,
   Link2,
+  Trash2,
 } from 'lucide-react';
 import { Booking, TeamNotification, DoctorAppointment } from '../types';
-import { updateBookingInDb, updateDoctorAppointmentInDb, markNotificationReadInDb, DbServiceStatus } from '../services/dbService';
+import {
+  updateBookingInDb,
+  updateDoctorAppointmentInDb,
+  markNotificationReadInDb,
+  clearOperationsLocalStorage,
+  DbServiceStatus,
+} from '../services/dbService';
 
 interface AdminDashboardProps {
   bookings: Booking[];
@@ -320,6 +327,23 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                   {unreadNotifCount}
                 </span>
               )}
+            </button>
+
+            <button
+              onClick={() => {
+                if (window.confirm('Reset and clear all saved operations queue data from local storage?')) {
+                  clearOperationsLocalStorage();
+                  setBookings([]);
+                  setDoctorAppointments([]);
+                  setNotifications([]);
+                  onNotify('Operations queue reset to fresh state.');
+                }
+              }}
+              title="Reset local queue storage"
+              className="p-3 rounded-2xl text-[11px] font-bold transition flex items-center gap-1.5 bg-slate-800 text-slate-400 hover:text-rose-300 hover:bg-slate-700 border border-slate-700 ml-auto sm:ml-0"
+            >
+              <Trash2 className="w-3.5 h-3.5" />
+              <span className="hidden sm:inline">Reset Queue</span>
             </button>
           </div>
         </div>

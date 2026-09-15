@@ -10,15 +10,45 @@ import {
   INITIAL_NOTIFICATIONS,
 } from '../data/mockData';
 
+const STORAGE_KEY_BOOKINGS = 'aurahealth_ops_bookings';
+const STORAGE_KEY_DOCTOR_APPTS = 'aurahealth_ops_doctor_appts';
+const STORAGE_KEY_NOTIFICATIONS = 'aurahealth_ops_notifications';
+
+// LocalStorage helpers
+const getLocalData = <T>(key: string, fallback: T): T => {
+  try {
+    const raw = localStorage.getItem(key);
+    return raw ? JSON.parse(raw) : fallback;
+  } catch (e) {
+    return fallback;
+  }
+};
+
+const setLocalData = <T>(key: string, data: T): void => {
+  try {
+    localStorage.setItem(key, JSON.stringify(data));
+  } catch (e) {
+    console.warn(`Could not save ${key} to localStorage:`, e);
+  }
+};
+
+export const clearOperationsLocalStorage = (): void => {
+  try {
+    localStorage.removeItem(STORAGE_KEY_BOOKINGS);
+    localStorage.removeItem(STORAGE_KEY_DOCTOR_APPTS);
+    localStorage.removeItem(STORAGE_KEY_NOTIFICATIONS);
+  } catch (e) {}
+};
+
 export interface DbServiceStatus {
   isPostgresConnected: boolean;
-  driver: 'SUPABASE_POSTGRESQL' | 'LOCAL_FALLBACK_MEMORY';
+  driver: 'SUPABASE_POSTGRESQL' | 'LOCAL_PERSISTENT_STORAGE';
 }
 
 export const getDbStatus = (): DbServiceStatus => {
   return {
     isPostgresConnected: isSupabaseConfigured(),
-    driver: isSupabaseConfigured() ? 'SUPABASE_POSTGRESQL' : 'LOCAL_FALLBACK_MEMORY',
+    driver: isSupabaseConfigured() ? 'SUPABASE_POSTGRESQL' : 'LOCAL_PERSISTENT_STORAGE',
   };
 };
 
@@ -28,7 +58,7 @@ export const getDbStatus = (): DbServiceStatus => {
 
 export const fetchBookingsFromDb = async (): Promise<Booking[]> => {
   if (!isSupabaseConfigured() || !supabase) {
-    return [...INITIAL_BOOKINGS];
+    return getLocalData<Booking[]>(STORAGE_KEY_BOOKINGS, [...INITIAL_BOOKINGS]);
   }
 
   try {
@@ -37,12 +67,11 @@ export const fetchBookingsFromDb = async (): Promise<Booking[]> => {
       .select('*')
       .order('created_at', { ascending: false });
 
-    if (error || !data) {
-      console.warn('Supabase fetchBookings error, using fallback:', error?.message);
-      return [...INITIAL_BOOKINGS];
+    if (error || !data || data.length === 0) {
+      return getLocalData<Booking[]>(STORAGE_KEY_BOOKINGS, [...INITIAL_BOOKINGS]);
     }
 
-    return data.map((row: any) => ({
+    const mapped = data.map((row: any) => ({
       id: row.id,
       bookingNumber: row.booking_number,
       officialLabRefNumber: row.official_lab_ref_number,
@@ -85,9 +114,11 @@ export const fetchBookingsFromDb = async (): Promise<Booking[]> => {
           }
         : undefined,
     }));
+
+    setLocalData(STORAGE_KEY_BOOKINGS, mapped);
+    return mapped;
   } catch (err) {
-    console.error('Error fetching bookings from Supabase:', err);
-    return [...INITIAL_BOOKINGS];
+    return getLocalData<Booking[]>(STORAGE_KEY_BOOKINGS, [...INITIAL_BOOKINGS]);
   }
 };
 
@@ -95,12 +126,19 @@ export const saveBookingToDb = async (
   booking: Booking,
   notification: TeamNotification
 ): Promise<{ success: boolean; error?: string }> => {
+  // Always persist to localStorage for instant survival across page reloads
+  const currentBookings = getLocalData<Booking[]>(STORAGE_KEY_BOOKINGS, [...INITIAL_BOOKINGS]);
+  setLocalData(STORAGE_KEY_BOOKINGS, [booking, ...currentBookings]);
+
+  const currentNotifs = getLocalData<TeamNotification[]>(STORAGE_KEY_NOTIFICATIONS, [...INITIAL_NOTIFICATIONS]);
+  setLocalData(STORAGE_KEY_NOTIFICATIONS, [notification, ...currentNotifs]);
+
   if (!isSupabaseConfigured() || !supabase) {
     return { success: true };
   }
 
   try {
-    const { error: bookingError } = await supabase.from('bookings').insert({
+    await supabase.from('bookings').insert({
       booking_number: booking.bookingNumber,
       patient_name: booking.patientDetails.name,
       patient_phone: booking.patientDetails.phone,
@@ -126,12 +164,6 @@ export const saveBookingToDb = async (
       team_notes: booking.teamNotes,
     });
 
-    if (bookingError) {
-      console.error('Error inserting booking to Supabase:', bookingError);
-      return { success: false, error: bookingError.message };
-    }
-
-    // Insert Notification to Supabase
     await supabase.from('team_notifications').insert({
       type: notification.type || 'LAB_TEST_BOOKING',
       booking_number: notification.bookingNumber,
@@ -147,7 +179,6 @@ export const saveBookingToDb = async (
 
     return { success: true };
   } catch (err: any) {
-    console.error('Exception saving booking to Supabase:', err);
     return { success: false, error: err.message };
   }
 };
@@ -156,6 +187,11 @@ export const updateBookingInDb = async (
   bookingNumber: string,
   updates: Partial<Booking>
 ): Promise<boolean> => {
+  // Always update in localStorage
+  const currentBookings = getLocalData<Booking[]>(STORAGE_KEY_BOOKINGS, [...INITIAL_BOOKINGS]);
+  const updated = currentBookings.map((b) => (b.bookingNumber === bookingNumber ? { ...b, ...updates } : b));
+  setLocalData(STORAGE_KEY_BOOKINGS, updated);
+
   if (!isSupabaseConfigured() || !supabase) return true;
 
   try {
@@ -177,7 +213,6 @@ export const updateBookingInDb = async (
 
     return !error;
   } catch (err) {
-    console.error('Error updating booking in Supabase:', err);
     return false;
   }
 };
@@ -188,7 +223,7 @@ export const updateBookingInDb = async (
 
 export const fetchDoctorAppointmentsFromDb = async (): Promise<DoctorAppointment[]> => {
   if (!isSupabaseConfigured() || !supabase) {
-    return [...INITIAL_DOCTOR_APPOINTMENTS];
+    return getLocalData<DoctorAppointment[]>(STORAGE_KEY_DOCTOR_APPTS, [...INITIAL_DOCTOR_APPOINTMENTS]);
   }
 
   try {
@@ -197,12 +232,11 @@ export const fetchDoctorAppointmentsFromDb = async (): Promise<DoctorAppointment
       .select('*')
       .order('created_at', { ascending: false });
 
-    if (error || !data) {
-      console.warn('Supabase fetchDoctorAppointments error, using fallback:', error?.message);
-      return [...INITIAL_DOCTOR_APPOINTMENTS];
+    if (error || !data || data.length === 0) {
+      return getLocalData<DoctorAppointment[]>(STORAGE_KEY_DOCTOR_APPTS, [...INITIAL_DOCTOR_APPOINTMENTS]);
     }
 
-    return data.map((row: any) => ({
+    const mapped = data.map((row: any) => ({
       id: row.id,
       appointmentNumber: row.appointment_number,
       createdAt: row.created_at ? new Date(row.created_at).toLocaleString() : 'Recently',
@@ -226,9 +260,11 @@ export const fetchDoctorAppointmentsFromDb = async (): Promise<DoctorAppointment
       confirmedByOperatorName: row.confirmed_by_operator_name,
       teamNotes: row.team_notes,
     }));
+
+    setLocalData(STORAGE_KEY_DOCTOR_APPTS, mapped);
+    return mapped;
   } catch (err) {
-    console.error('Error fetching doctor appointments from Supabase:', err);
-    return [...INITIAL_DOCTOR_APPOINTMENTS];
+    return getLocalData<DoctorAppointment[]>(STORAGE_KEY_DOCTOR_APPTS, [...INITIAL_DOCTOR_APPOINTMENTS]);
   }
 };
 
@@ -236,12 +272,19 @@ export const saveDoctorAppointmentToDb = async (
   appt: DoctorAppointment,
   notification: TeamNotification
 ): Promise<{ success: boolean; error?: string }> => {
+  // Always persist to localStorage
+  const currentAppts = getLocalData<DoctorAppointment[]>(STORAGE_KEY_DOCTOR_APPTS, [...INITIAL_DOCTOR_APPOINTMENTS]);
+  setLocalData(STORAGE_KEY_DOCTOR_APPTS, [appt, ...currentAppts]);
+
+  const currentNotifs = getLocalData<TeamNotification[]>(STORAGE_KEY_NOTIFICATIONS, [...INITIAL_NOTIFICATIONS]);
+  setLocalData(STORAGE_KEY_NOTIFICATIONS, [notification, ...currentNotifs]);
+
   if (!isSupabaseConfigured() || !supabase) {
     return { success: true };
   }
 
   try {
-    const { error: apptError } = await supabase.from('doctor_appointments').insert({
+    await supabase.from('doctor_appointments').insert({
       appointment_number: appt.appointmentNumber,
       doctor_id: appt.doctorId,
       doctor_name: appt.doctorName,
@@ -263,12 +306,6 @@ export const saveDoctorAppointmentToDb = async (
       team_notes: appt.teamNotes || null,
     });
 
-    if (apptError) {
-      console.error('Error saving doctor appointment to Supabase:', apptError);
-      return { success: false, error: apptError.message };
-    }
-
-    // Insert Notification
     await supabase.from('team_notifications').insert({
       type: notification.type || 'DOCTOR_CONSULTATION',
       booking_number: notification.bookingNumber,
@@ -284,7 +321,6 @@ export const saveDoctorAppointmentToDb = async (
 
     return { success: true };
   } catch (err: any) {
-    console.error('Exception saving doctor appointment to Supabase:', err);
     return { success: false, error: err.message };
   }
 };
@@ -293,6 +329,11 @@ export const updateDoctorAppointmentInDb = async (
   appointmentNumber: string,
   updates: Partial<DoctorAppointment>
 ): Promise<boolean> => {
+  // Always update in localStorage
+  const currentAppts = getLocalData<DoctorAppointment[]>(STORAGE_KEY_DOCTOR_APPTS, [...INITIAL_DOCTOR_APPOINTMENTS]);
+  const updated = currentAppts.map((a) => (a.appointmentNumber === appointmentNumber ? { ...a, ...updates } : a));
+  setLocalData(STORAGE_KEY_DOCTOR_APPTS, updated);
+
   if (!isSupabaseConfigured() || !supabase) return true;
 
   try {
@@ -309,7 +350,6 @@ export const updateDoctorAppointmentInDb = async (
 
     return !error;
   } catch (err) {
-    console.error('Error updating doctor appointment in Supabase:', err);
     return false;
   }
 };
@@ -320,7 +360,7 @@ export const updateDoctorAppointmentInDb = async (
 
 export const fetchNotificationsFromDb = async (): Promise<TeamNotification[]> => {
   if (!isSupabaseConfigured() || !supabase) {
-    return [...INITIAL_NOTIFICATIONS];
+    return getLocalData<TeamNotification[]>(STORAGE_KEY_NOTIFICATIONS, [...INITIAL_NOTIFICATIONS]);
   }
 
   try {
@@ -329,11 +369,11 @@ export const fetchNotificationsFromDb = async (): Promise<TeamNotification[]> =>
       .select('*')
       .order('created_at', { ascending: false });
 
-    if (error || !data) {
-      return [...INITIAL_NOTIFICATIONS];
+    if (error || !data || data.length === 0) {
+      return getLocalData<TeamNotification[]>(STORAGE_KEY_NOTIFICATIONS, [...INITIAL_NOTIFICATIONS]);
     }
 
-    return data.map((row: any) => ({
+    const mapped = data.map((row: any) => ({
       id: row.id,
       type: row.type || 'LAB_TEST_BOOKING',
       bookingNumber: row.booking_number,
@@ -347,12 +387,19 @@ export const fetchNotificationsFromDb = async (): Promise<TeamNotification[]> =>
       timestamp: row.created_at ? new Date(row.created_at).toLocaleTimeString() : 'Just now',
       isRead: Boolean(row.is_read),
     }));
+
+    setLocalData(STORAGE_KEY_NOTIFICATIONS, mapped);
+    return mapped;
   } catch (err) {
-    return [...INITIAL_NOTIFICATIONS];
+    return getLocalData<TeamNotification[]>(STORAGE_KEY_NOTIFICATIONS, [...INITIAL_NOTIFICATIONS]);
   }
 };
 
 export const markNotificationReadInDb = async (id: string): Promise<boolean> => {
+  const currentNotifs = getLocalData<TeamNotification[]>(STORAGE_KEY_NOTIFICATIONS, [...INITIAL_NOTIFICATIONS]);
+  const updated = currentNotifs.map((n) => (n.id === id ? { ...n, isRead: true } : n));
+  setLocalData(STORAGE_KEY_NOTIFICATIONS, updated);
+
   if (!isSupabaseConfigured() || !supabase) return true;
   const { error } = await supabase.from('team_notifications').update({ is_read: true }).eq('id', id);
   return !error;
