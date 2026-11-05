@@ -18,6 +18,7 @@ import { PatientRegistrationModal } from './components/PatientRegistrationModal'
 import { LabComparisonModal } from './components/LabComparisonModal';
 import { CartDrawer } from './components/CartDrawer';
 import { HomeCollectionBookingModal } from './components/HomeCollectionBookingModal';
+import { WhatsAppChatButton } from './components/WhatsAppChatButton';
 import { CartItem, HealthPackage, TestItem, Booking, PatientProfile, LabTestOffering, TeamNotification, DoctorAppointment } from './types';
 import { INITIAL_BOOKINGS, HEALTH_PACKAGES, INITIAL_EMPTY_PATIENT_PROFILE, POPULAR_TESTS, INITIAL_DOCTOR_APPOINTMENTS, INITIAL_NOTIFICATIONS } from './data/mockData';
 import {
@@ -192,7 +193,7 @@ export function App() {
     <div className="min-h-screen flex flex-col bg-slate-50 font-sans">
       {/* Toast Notification */}
       {toast && (
-        <div className="fixed bottom-6 right-6 z-50 bg-slate-900 text-white text-xs font-bold px-4 py-3 rounded-2xl shadow-2xl flex items-center gap-2.5 border border-slate-700 animate-bounce">
+        <div className="fixed bottom-24 right-6 z-50 bg-slate-900 text-white text-xs font-bold px-4 py-3 rounded-2xl shadow-2xl flex items-center gap-2.5 border border-slate-700 animate-bounce">
           <Check className="w-4 h-4 text-emerald-400 shrink-0" />
           <span>{toast}</span>
         </div>
@@ -415,6 +416,9 @@ export function App() {
         }}
         setActiveTab={setActiveTab}
       />
+
+      {/* Floating 24x7 WhatsApp Chat Button */}
+      <WhatsAppChatButton phoneNumber="9814926491" />
     </div>
   );
 }

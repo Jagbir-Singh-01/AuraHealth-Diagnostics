@@ -11,6 +11,7 @@ import {
   ShieldCheck,
   Sparkles,
   Camera,
+  MessageCircle,
 } from 'lucide-react';
 import { NORTH_INDIA_CITIES } from '../data/mockData';
 
@@ -254,6 +255,22 @@ export const QuickPrescriptionModal: React.FC<QuickPrescriptionModalProps> = ({
                   </>
                 )}
               </button>
+
+              <div className="relative flex py-1 items-center">
+                <div className="flex-grow border-t border-slate-200"></div>
+                <span className="flex-shrink mx-3 text-[10px] uppercase font-bold text-slate-400">or send via whatsapp</span>
+                <div className="flex-grow border-t border-slate-200"></div>
+              </div>
+
+              <a
+                href="https://wa.me/919814926491?text=Hello%20AuraHealth!%20I%20am%20sharing%20my%20doctor%20prescription%20for%20lab%20test%20booking."
+                target="_blank"
+                rel="noreferrer"
+                className="w-full py-2.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-300 text-xs font-bold rounded-xl transition flex items-center justify-center gap-2"
+              >
+                <MessageCircle className="w-4 h-4 text-emerald-600" />
+                <span>Send Prescription on WhatsApp (+91 98149 26491)</span>
+              </a>
             </form>
           )}
         </div>

@@ -154,16 +154,29 @@ export const Footer: React.FC<FooterProps> = ({ onSelectCity, setActiveTab }) =>
                 </div>
               </div>
 
-              <div className="flex items-center gap-2">
-                <MessageCircle className="w-4 h-4 text-emerald-400 shrink-0" />
-                <a
-                  href="https://wa.me/919810122399"
-                  target="_blank"
-                  rel="noreferrer"
-                  className="hover:text-white transition font-medium"
-                >
-                  WhatsApp Booking: +91 98101 22399
-                </a>
+              <div className="space-y-2 pt-1">
+                <div className="flex items-center gap-2">
+                  <MessageCircle className="w-4 h-4 text-emerald-400 shrink-0" />
+                  <a
+                    href="https://wa.me/919814926491?text=Hello%20AuraHealth!%20I%20would%20like%20to%20inquire%20about%20lab%20tests%20and%20health%20packages."
+                    target="_blank"
+                    rel="noreferrer"
+                    className="hover:text-emerald-400 transition font-medium"
+                  >
+                    WhatsApp: +91 98149 26491
+                  </a>
+                </div>
+                <div>
+                  <a
+                    href="https://wa.me/919814926491?text=Hello%20AuraHealth!%20I%20would%20like%20to%20inquire%20about%20lab%20tests%20and%20health%20packages."
+                    target="_blank"
+                    rel="noreferrer"
+                    className="inline-flex items-center gap-2 px-3 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-bold transition shadow-sm"
+                  >
+                    <MessageCircle className="w-3.5 h-3.5" />
+                    <span>Chat on WhatsApp</span>
+                  </a>
+                </div>
               </div>
 
               <div className="flex items-center gap-2">
