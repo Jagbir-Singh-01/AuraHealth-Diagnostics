@@ -19,6 +19,7 @@ import { LabComparisonModal } from './components/LabComparisonModal';
 import { CartDrawer } from './components/CartDrawer';
 import { HomeCollectionBookingModal } from './components/HomeCollectionBookingModal';
 import { WhatsAppChatButton } from './components/WhatsAppChatButton';
+import { AIChatBotModal } from './components/AIChatBotModal';
 import { CartItem, HealthPackage, TestItem, Booking, PatientProfile, LabTestOffering, TeamNotification, DoctorAppointment } from './types';
 import { INITIAL_BOOKINGS, HEALTH_PACKAGES, INITIAL_EMPTY_PATIENT_PROFILE, POPULAR_TESTS, INITIAL_DOCTOR_APPOINTMENTS, INITIAL_NOTIFICATIONS } from './data/mockData';
 import {
@@ -87,6 +88,7 @@ export function App() {
   const [isRegistrationModalOpen, setIsRegistrationModalOpen] = useState(false);
   const [isCartDrawerOpen, setIsCartDrawerOpen] = useState(false);
   const [isBookingModalOpen, setIsBookingModalOpen] = useState(false);
+  const [isAiChatOpen, setIsAiChatOpen] = useState(false);
 
   // Lab Comparison Modal
   const [comparisonItem, setComparisonItem] = useState<TestItem | HealthPackage | null>(null);
@@ -213,6 +215,7 @@ export function App() {
         activeTab={activeTab}
         setActiveTab={setActiveTab}
         onSearchFocus={handleSearchFocus}
+        onOpenAiChat={() => setIsAiChatOpen(true)}
       />
 
       {/* Main Content Router */}
@@ -418,7 +421,19 @@ export function App() {
       />
 
       {/* Floating 24x7 WhatsApp Chat Button */}
-      <WhatsAppChatButton phoneNumber="9814926491" />
+      <WhatsAppChatButton
+        phoneNumber="9814926491"
+        isAiChatOpen={isAiChatOpen}
+        onToggleAiChat={() => setIsAiChatOpen(!isAiChatOpen)}
+      />
+
+      {/* Free 24x7 AI Diagnostic Chatbot Modal */}
+      <AIChatBotModal
+        isOpen={isAiChatOpen}
+        onClose={() => setIsAiChatOpen(false)}
+        selectedCity={selectedCity}
+        phoneNumber="9814926491"
+      />
     </div>
   );
 }

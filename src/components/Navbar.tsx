@@ -19,6 +19,7 @@ import {
   UserPlus,
   Bell,
   MessageCircle,
+  Bot,
 } from 'lucide-react';
 import { PatientProfile } from '../types';
 
@@ -35,6 +36,7 @@ interface NavbarProps {
   activeTab: string;
   setActiveTab: (tab: string) => void;
   onSearchFocus: () => void;
+  onOpenAiChat?: () => void;
 }
 
 export const Navbar: React.FC<NavbarProps> = ({
@@ -50,6 +52,7 @@ export const Navbar: React.FC<NavbarProps> = ({
   activeTab,
   setActiveTab,
   onSearchFocus,
+  onOpenAiChat,
 }) => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
@@ -87,6 +90,15 @@ export const Navbar: React.FC<NavbarProps> = ({
               <MessageCircle className="w-3 h-3 text-white" />
               <span>WhatsApp: +91 98149 26491</span>
             </a>
+
+            <button
+              onClick={onOpenAiChat}
+              className="hidden md:flex items-center gap-1.5 bg-gradient-to-r from-brand-teal to-emerald-400 hover:from-teal-300 hover:to-emerald-300 text-slate-900 px-3 py-0.5 rounded-full text-[11px] font-black transition shadow-xs"
+              title="Open Free 24x7 AI Health & Diagnostic Chatbot"
+            >
+              <Bot className="w-3.5 h-3.5" />
+              <span>Ask AI Chatbot (Free)</span>
+            </button>
 
             <div className="hidden xl:flex items-center gap-1 text-[11px] text-emerald-400 bg-emerald-950/40 px-2.5 py-0.5 rounded-full border border-emerald-500/20">
               <Clock className="w-3 h-3" />
